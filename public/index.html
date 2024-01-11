@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Institution Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="image/png" href="images/favicon.png"/>
+</head>
+<body>
+    <!-- login/register page -->
+    <div id="login-page" class="page">
+        <div class="login-page">
+            <div class="logo">
+                <img src="images/Logo.jpg" alt="">
+            </div>
+            
+            <div class="wrapper">
+                <!-- login form -->
+                <div class="form-box login">
+                    <form action="">
+                        <h1>Login</h1>
+                        <div class="input-box">
+                            <input type="text" placeholder="Username" required>
+                            <i class='bx bxs-user'></i>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" placeholder="password" required>        
+                            <i class='bx bxs-lock-alt'></i>
+                        </div>
+                        
+                        <div class="remember-forgot">
+                            <label><input type="checkbox"> Remember me</label>
+                            <a href="#">Forgot Password</a>
+                        </div>
+                        
+                        <button type="submit" class="btn">Login</button>
+                        
+                        <div class="register-link my-link">
+                            <p>Don't have an account? <a href="#">Register</a></p>
+                        </div>
+                    </form>
+                </div>
+            
+                <!-- register form -->
+                <div class="form-box register">
+                    <form action="">
+                        <h1>Register</h1>
+                        <div class="input-box">
+                            <input type="text" placeholder="Username" required>
+                            <i class='bx bxs-user'></i>
+                        </div>
+                        <div class="input-box">
+                            <input type="text" placeholder="password" required>
+                            <i class='bx bxs-lock-alt'></i>
+                        </div>
+                        
+                        <button type="submit" class="btn">Register</button>
+                        
+                        <div class="login-link my-link">
+                                <p>Already have an account? <a href="#">Login</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- home page -->
+    <div id="home-page" class="page"> 
+        <div class="home-page">
+            <header class="header">    
+                <a href="#" class="logo-small">MIPM</a>
+                
+                <div class="navbar">
+                    <button class="tablink">Patients</button>
+                    <button class="tablink">Personnel</button>
+                    <button class="tablink">Stations</button>
+                    <button class="tablink">Booking</button>
+                    <button class="sign-out-button">Sign out</button>
+                </div>
+                <div class="line"></div>
+            </header>
+            
+            <button type = "button"> CLick me! </button>
+
+            <div class="content-box">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis, officiis iste repudiandae ratione incidunt pariatur ad, amet doloribus asperiores perspiciatis et! Et, quis ab earum vitae ipsam temporibus tempore modi!</p>
+                    <table> 
+                        <thead>
+                            <tr class="table-head">
+                                <th class="cloumn1">Date</th>
+                                <th class="cloumn2">Time</th>
+                                <th class="cloumn3">Patient</th>
+                                <th class="cloumn4">Doctor</th>
+                                <th class="cloumn5">Station</th>
+                                <th class="cloumn6">Status</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                
+                <div class="content"> <p>hi</p></div>
+                
+            </div>
+        </div>
+    </div>
+        
+        <script src="js/script.js"></script>
+    </body>
+    </html>
+    
