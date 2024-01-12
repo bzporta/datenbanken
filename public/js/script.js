@@ -218,13 +218,7 @@ personnelForm.addEventListener('submit', (e) => {
     
     executeSqlCommand(query);
 
-    // temporarly changing the personnel
-    // personnel.push({
-    //     krankenhaus_id: personnelForm.krankenhausid.value,
-    //     name: personnelForm.name.value,
-    //     position: personnelForm.value,
-    //     email: personnelForm.email.value
-    // });
+    
 
     personnelForm.reset();
 });
