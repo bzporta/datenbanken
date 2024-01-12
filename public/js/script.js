@@ -169,20 +169,6 @@ function constructTable(data, table_id) {
 
 // personnel
 
-// temporary data
-let personnel = [
-    {
-        name: 'Max Mustermann',
-        position: 'CEO',
-        email: 'testmail.com',
-        geschlecht: 'Divers'
-    },
-    {
-        name: 'Bjarne Mädel',
-        position: 'CTO',
-        email: 'Bjarnemail.com'
-    }
-]
 
 async function executeSqlCommand(sql_command) {
     var result = await fetch('/api/sql', {
@@ -203,8 +189,7 @@ async function executeSqlCommand(sql_command) {
 personnelCreateTableButton = document.getElementById('createTableButton');
 personnelCreateTableButton.addEventListener('click', async () => {
     var result = await executeSqlCommand(
-        `SELECT *
-         FROM ARZT
+        `SELECT * FROM "MIPM"."ARZT"
          `
     )
     constructTable(result, 'Personnel-table');
@@ -245,7 +230,7 @@ personnelForm.addEventListener('submit', (e) => {
 });
 
 
-// Patient
+// Stations
 
 
 init();
