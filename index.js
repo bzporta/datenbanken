@@ -39,6 +39,61 @@ app.get('/api/test', (req, res) => {
   res.json(responseData);
 });
 
+app.post('/test', (req, res) => {
+  console.log(req.body.sql_command);
+  try {
+    const connection =  oracledb.getConnection({
+      user: 'mipm',
+      password: 'orcPW2023',
+      connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
+    });
+    
+    const result =  connection.execute(
+      req.body.sql_command
+    );
+    
+  
+    connection.close();
+
+    res.json(result.rows);
+  
+
+
+  } catch (error) {
+    console.error('Fehler bei der Datenbankabfrage:', error);
+  }
+  
+  res.json({message: "lol"})
+});
+
+app.post('/api/sql',  async (req, res) => {
+  var result;
+  try {
+    const connection =  await oracledb.getConnection({
+      user: 'mipm',
+      password: 'orcPW2023',
+      connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
+    });
+
+
+    
+    result = await connection.execute(
+      req.body.sql_command
+    );
+
+
+
+    //console.log(req.body.sql_command);
+    
+  
+    await connection.close();
+
+  } catch (error) {
+    console.error('Fehler bei der Datenbankabfrage:', error);
+  }
+  res.json(result.rows);
+});
+
 
 app.get('/api/arzt', async (req, res) => {
     try {
