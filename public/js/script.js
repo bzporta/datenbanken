@@ -205,8 +205,7 @@ personnelCreateTableButton.addEventListener('click', async () => {
     var result = await executeSqlCommand(
         `SELECT *
          FROM ARZT
-         WHERE KRANKENHAUS_ID = 1
-         ORDER BY MITARBEITER_NR`
+         `
     )
     constructTable(result, 'Personnel-table');
 
@@ -244,6 +243,9 @@ personnelForm.addEventListener('submit', (e) => {
 
     personnelForm.reset();
 });
+
+
+// Patient
 
 
 init();
