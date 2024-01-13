@@ -71,7 +71,10 @@
     <!-- home page -->
     <div id="home-page" class="page"> 
         <div class="home-page">
-            <header class="header">    
+            <header class="header">
+                <div class="logo_klein">
+                    <img src="images/favicon.png" alt=" ">
+                </div>
                 <a href="#" class="logo-small">MIPM</a>
                 
                 <div class="navbar">
@@ -89,20 +92,79 @@
 
             <div class="content-box">
                 <!-- Patients -->
-                <div class="content">
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis, officiis iste repudiandae ratione incidunt pariatur ad, amet doloribus asperiores perspiciatis et! Et, quis ab earum vitae ipsam temporibus tempore modi!</p>
-                    <table> 
-                        <thead>
-                            <tr class="table-head">
-                                <th class="cloumn1">Date</th>
-                                <th class="cloumn2">Time</th>
-                                <th class="cloumn3">Patient</th>
-                                <th class="cloumn4">Doctor</th>
-                                <th class="cloumn5">Station</th>
-                                <th class="cloumn6">Status</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <div class="content" id="patiententab">
+                    <div class="wrapper">
+                        <h2>Patienten</h2>
+
+                        <form action="" id="patienten-form">
+                            <div class="form-box">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" placeholder="Name, Vorname" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="patientenKrankenhausId">Krankenhaus-Id</label>
+                                <input type="text" id="patientenKrankenhausId" name="patientenKrankenhausId" placeholder="Krankenhaus-Id" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="patientenRaumId">Krankenhaus-Id</label>
+                                <input type="text" id="patientenRaumId" name="patientenRaumId" placeholder="Raum-Id" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="patientenaufnahmedatum">Aufnahmedatum</label>
+                                <input type="date" id="patientenaufnahmedatum" name="patientenaufnahmedatum" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="patientenentlassungsdatum">Entlassungsdatum</label>
+                                <input type="date" id="patientenentlassungsdatum" name="patientenentlassungsdatum">
+                            </div>
+                            <div class="form-box">
+                                <label for="patientengeschlecht">Geschlecht</label>
+                                <select name="patientengeschlecht" id="patientengeschlecht" required>
+                                    <option value="">--Select a gender--</option>
+                                    <option value="0">Männlich</option>
+                                    <option value="1">Weiblich</option>
+                                    <option value="2">Divers</option>
+                                </select>
+                            </div>
+                            <div class="form-box">
+                                <label for="patientengeburtsdatum">Geburtsdatum</label>
+                                <input type="date" id="patientengeburtsdatum" name="patientengeburtsdatum" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="patientenblutgruppe">Blutgruppe</label>
+                                <select name="patientenblutgruppe" id="patientenblutgruppe">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="AB">AB</option>
+                                    <option value="0">0</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn">Add Patient</button>
+                        </form>   
+                        <!-- Deleteform -->
+                        <form action="">
+                            <label for="patientendelete">Patienten-Id</label>
+                            <input type="text" id="patientendelete" name="patientendelete" placeholder="Patienten-Id" required>
+                            <button type="submit" class="btn">Delete Patient</button>
+                        </form>
+                        
+                        <button class="btn createTableButton">CreateTable</button>
+                    </div>
+
+                    <div>
+                        <div class="wrapper">
+                            Siehst du das?
+
+                            <div class="table-container">
+                                <table id="patienten-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>      
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Stations -->
@@ -112,7 +174,7 @@
                 
                 <!-- Personell -->
                 <div class="content">
-                    <div id="aerztetab"> 
+                    <div id="aerztetab" class="content2"> 
                         <!-- Aerzte -->
                         <div class="wrapper">
                             <h2>Ärzte</h2>
@@ -139,8 +201,8 @@
                                     <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="arbeitsbeginn">Arbeitsbegin</label>
-                                    <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
+                                    <label for="arbeitsbeginn">Arbeitsbeginn</label>
+                                    <input type="text" id="arbeitsbeginn" name="arbeitsbeginn" placeholder="Arbeitsbeginn" required>
                                 </div>
                                 <div class="form-box">
                                     <label for="arbeitsende">Arbeitsende</label>
@@ -157,6 +219,12 @@
                                 
                                 <button type="submit" class="btn">Add Personnel</button>
                             </form>
+                            <!-- Deleteform -->
+                            <form action="">
+                                <label for="mitarbeiteridDelete">Mitarbeiter-Id</label>
+                                <input type="text" id="mitarbeiteridDelete" name="mitarbeiteridDelete" placeholder="Mitarbeiter-Id" required>
+                                <button type="submit" class="btn">Delete Personnel</button>
+                            </form>
                             <button id="createTableButton" class="btn">CreateTable</button>
                         </div>
                             
@@ -169,7 +237,7 @@
                     </div>
 
                     <!-- Krankenpfleger -->
-                    <div id="krankenpflegertab">
+                    <div id="krankenpflegertab" class="content2">
                         <div class="wrapper">
                             <h2>Krankenpfleger</h2>
                             <!-- change tab -->
@@ -181,7 +249,7 @@
                                 <label for="krankenpfleger-tab-button-2" class="toggle-label">Krankenpfleger</label>
                             </div>
 
-                            <form action="" id="personnel-form">
+                            <form action="">
                                 <div class="form-box">
                                     <label for="krankenhausid">Krankenhaus-id</label>
                                     <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Krankenhaus-Id" required>
@@ -195,8 +263,8 @@
                                     <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="arbeitsbeginn">Arbeitsbegin</label>
-                                    <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
+                                    <label for="arbeitsbeginn">Arbeitsbeginn</label>
+                                    <input type="text" id="arbeitsbeginn" name="arbeitsbeginn" placeholder="Arbeitsbeginn" required>
                                 </div>
                                 <div class="form-box">
                                     <label for="arbeitsende">Arbeitsende</label>
@@ -213,11 +281,17 @@
                                 
                                 <button type="submit" class="btn">Add Personnel</button>
                             </form>
-                            <button id="createTableButton" class="btn">CreateTable</button>
+                            <!-- Deleteform -->
+                            <form action="">
+                                <label for="mitarbeiteridDelete">Mitarbeiter-Id</label>
+                                <input type="text" id="mitarbeiteridDelete" name="mitarbeiteridDelete" placeholder="Mitarbeiter-Id" required>
+                                <button type="submit" class="btn">Delete Personnel</button>
+                            </form>
+                            <button class="btn createTableButton">CreateTable</button>
                         </div>
 
                         <div class="table-container">
-                            <table id="aerzte-table">
+                            <table id="krankenpfleger-table">
                                 <thead></thead>
                                 <tbody></tbody>
                             </table>      
