@@ -185,6 +185,12 @@ async function executeSqlCommand(sql_command) {
     }
 }
 
+// Diagnosis
+
+diagnosisdatepicker = document.getElementById('diagnosisdate');
+diagnosisdatepicker.value = new Date().toISOString().slice(0, 10);
+
+
 // personnel
 
 personnelTabButtonAerzte         = document.getElementById('aerzte-tab-button-2');

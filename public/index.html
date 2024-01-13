@@ -76,9 +76,10 @@
                 
                 <div class="navbar">
                     <button class="tablink">Patients</button>
-                    <button class="tablink">Personnel</button>
                     <button class="tablink">Stations</button>
+                    <button class="tablink">Personnel</button>
                     <button class="tablink">Diagnoses</button>
+                    <button class="tablink">Treatments</button>
                     <button class="tablink">Booking</button>
                     <button class="sign-out-button">Sign out</button>
                 </div>
@@ -102,6 +103,11 @@
                             </tr>
                         </thead>
                     </table>
+                </div>
+
+                <!-- Stations -->
+                <div class="content">
+
                 </div>
                 
                 <!-- Personell -->
@@ -219,15 +225,37 @@
                     </div>
                 </div>
 
-                <!-- Stations -->
-                <div class="content">
-
-                </div>
 
                 <!-- Diagnoses -->
                 <div class="content">
                     <div class="wrapper">
                         <form action="" id="diagnoses-form">
+                            <div class="form-box">
+                                <label for="diagnoseid"></label>
+                                <input type="text" id="diagnoseid" name="diagnoseid" placeholder="Diagnosis-Id" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="diagnosisdate">Date</label>
+                                <input type="date" id="diagnosisdate" name="diagnosesdate" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="vorname">Vorname</label>
+                                <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
+                            </div>
+                            <div class="form-box">
+                                <label for="arbeitsbeginn">Arbeitsbegin</label>
+                                <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
+                            </div>
+                            
+                            <button type="submit" class="btn">Add Personnel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Treatments -->
+                <div class="content">
+                    <div class="wrapper">
+                        <form action="" id="treatments-form">
                             <div class="form-box">
                                 <label for="krankenhausid">Krankenhaus-id</label>
                                 <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Diagnosis" required>
@@ -248,6 +276,7 @@
                             <button type="submit" class="btn">Add Personnel</button>
                         </form>
                     </div>
+
                 </div>
 
             </div>
