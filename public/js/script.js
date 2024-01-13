@@ -185,6 +185,22 @@ async function executeSqlCommand(sql_command) {
     }
 }
 
+// Treatment
+
+treatmentTabButtonTherapie = document.getElementById('therapie-tab-button2');
+treatmentTabButtonOperation = document.getElementById('operation-tab-button');
+treatmentTabButtonTherapie.addEventListener('click', (e) => {
+    e.preventDefault();
+    showElementById('therapietab');
+    hideElementById('operationstab');
+});
+
+treatmentTabButtonOperation.addEventListener('click', (e) => {
+    e.preventDefault();
+    showElementById('operationstab');
+    hideElementById('therapietab');
+});
+
 // Diagnosis
 
 diagnosisdatepicker = document.getElementById('diagnosisdate');
@@ -215,8 +231,9 @@ personnelCreateTableButton.addEventListener('click', async () => {
          `
     )
     constructTable(result, 'Personnel-table');
-
 });
+
+personnalkrankenpflegerCreateTableButton = document.getElementById('createTableButton2');
 
 // Personnelform ARZT
 personnelForm = document.getElementById('personnel-form');

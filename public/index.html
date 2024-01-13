@@ -203,12 +203,12 @@
                                     <input type="text" id="arbeitsende" name="arbeitsende" placeholder="Arbeitsende" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="fachrichtung">Fachrichtung</label>
-                                    <input type="text" id="fachrichtung" name="fachrichtung" placeholder="Fachrichtung" required>
+                                    <label for="qualifikationen">Qualifikationen</label>
+                                    <input type="text" id="qualifikationen" name="qualifikationen" placeholder="Qualifikation" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="position">Position</label>
-                                    <input type="text" id="position" name="position" placeholder="Position" required>
+                                    <label for="berechtigungen">Berechtigungen</label>
+                                    <input type="text" id="berechtigungen" name="berechtigungen" placeholder="Berechtigungen" required>
                                 </div>
                                 
                                 <button type="submit" class="btn">Add Personnel</button>
@@ -229,56 +229,125 @@
                 <!-- Diagnoses -->
                 <div class="content">
                     <div class="wrapper">
+                        <h2>Diagnoses</h2>
+
                         <form action="" id="diagnoses-form">
-                            <div class="form-box">
-                                <label for="diagnoseid"></label>
-                                <input type="text" id="diagnoseid" name="diagnoseid" placeholder="Diagnosis-Id" required>
-                            </div>
                             <div class="form-box">
                                 <label for="diagnosisdate">Date</label>
                                 <input type="date" id="diagnosisdate" name="diagnosesdate" required>
                             </div>
                             <div class="form-box">
-                                <label for="vorname">Vorname</label>
-                                <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
+                                <label for="Description">Description</label>
+                                <textarea class="input-textarea" id="diagnosisdescription" name="diagnosisdescription" rows="5" required></textarea>
                             </div>
                             <div class="form-box">
-                                <label for="arbeitsbeginn">Arbeitsbegin</label>
-                                <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
+                                <label for="diagnosisstatus">Status</label>
+                                <select name="diagnosisstatus" id="diagnosisstatus" required>
+                                    <option value="">--Please choose an option--</option>
+                                    <option value="0">Treatment completed</option>
+                                    <option value="1">No Treatment</option>
+                                    <option value="2">In Progress</option>
+                                </select>
                             </div>
                             
                             <button type="submit" class="btn">Add Personnel</button>
                         </form>
+                        <button id="createTableButton" class="btn">CreateTable</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="diagnoses-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>      
                     </div>
                 </div>
 
                 <!-- Treatments -->
                 <div class="content">
-                    <div class="wrapper">
-                        <form action="" id="treatments-form">
-                            <div class="form-box">
-                                <label for="krankenhausid">Krankenhaus-id</label>
-                                <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Diagnosis" required>
+                    <div id="therapietab">
+                        <div class="wrapper">
+                            <h2>Therapie</h2>
+                            <div>
+                                <input type="radio" id="therapie-tab-button" class="toggle-rad" name="therapie-tab-toggle" checked>
+                                <label for="therapie-tab-button" class="toggle-label">Therapien</label>
+                                
+                                <input type="radio" id="operation-tab-button" class="toggle-rad" name="operation-tab-toggle">
+                                <label for="operation-tab-button" class="toggle-label">Operations</label>
                             </div>
-                            <div class="form-box">
-                                <label for="name">Name</label>
-                                <input type="text" id="name" name="name" placeholder="Name" required>
+
+                            <form action="" id="treatments-form">
+                                <div class="form-box">
+                                    <label for="krankenhausid">Krankenhaus-id</label>
+                                    <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Diagnosis" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" name="name" placeholder="Name" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="vorname">Vorname</label>
+                                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="arbeitsbeginn">Arbeitsbegin</label>
+                                    <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
+                                </div>
+                                
+                                <button type="submit" class="btn">Add Personnel</button>
+                            </form>
+                            <button id="createTableButton" class="btn">CreateTable</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="treatments-table">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>      
+                        </div>
+                    </div>
+
+                    <div id="operationstab">
+                        <div class="wrapper">
+                            <h2>Operations</h2>
+                            <div>
+                                <input type="radio" id="therapie-tab-button2" class="toggle-rad" name="therapie-tab-toggle">
+                                <label for="therapie-tab-button2" class="toggle-label">Therapien</label>
+                                
+                                <input type="radio" id="operation-tab-button2" class="toggle-rad" name="operation-tab-toggle" checked>
+                                <label for="operation-tab-button" class="toggle-label">Operations</label>
                             </div>
-                            <div class="form-box">
-                                <label for="vorname">Vorname</label>
-                                <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="arbeitsbeginn">Arbeitsbegin</label>
-                                <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
-                            </div>
-                            
-                            <button type="submit" class="btn">Add Personnel</button>
-                        </form>
+
+                            <form action="" id="operations-form">
+                                <div class="form-box">
+                                    <label for="krankenhausid">Krankenhaus-id</label>
+                                    <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Diagnosis" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" name="name" placeholder="Name" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="vorname">Vorname</label>
+                                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="arbeitsbeginn">Arbeitsbegin</label>
+                                    <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
+                                </div>
+                                
+                                <button type="submit" class="btn">Add Personnel</button>
+                            </form>
+                            <button id="createTableButton" class="btn">CreateTable</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="treatments-table">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>      
+                        </div>
                     </div>
 
                 </div>
-
+                
             </div>
         </div>
     </div>

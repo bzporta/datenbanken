@@ -163,6 +163,19 @@ td {
   }
 }
 
+/* Treatments */
+
+#operationstab {
+  display: none;
+}
+
+/* Diagnosis */
+
+.input-textarea {
+  width: 100%;
+  resize: none;
+}
+
 .table-head {
   height: 60px;
   background: #36304a;
