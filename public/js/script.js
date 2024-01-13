@@ -61,15 +61,9 @@ loginForm.addEventListener('submit', (e) => {
 });
 
 registerLink.onclick = () => {
-    // wrapper.classList.add('active');
-    // showElement('.form-box.register');
-    // hideElement('.form-box.login');
-    fetch('/api/arzt')
-        .then(response => response.json())
-        .then(response => {
-            let data = response;
-            console.log(data);
-        });
+    wrapper.classList.add('active');
+    showElement('.form-box.register');
+    hideElement('.form-box.login');
 };
 
 loginLink.onclick = () => {
@@ -124,6 +118,14 @@ function changeHomePageTabContent(tab) {
     });
 }
 
+function hideElementById(id) {
+    // Funktion, um das Element auszublenden
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = 'none';
+    }
+}
+
 function hideElement(selector) {
     // Funktion, um das Element auszublenden
     const element = document.querySelector(selector);
@@ -167,9 +169,6 @@ function constructTable(data, table_id) {
     });
 }
 
-// personnel
-
-
 async function executeSqlCommand(sql_command) {
     var result = await fetch('/api/sql', {
         method: "POST",
@@ -185,6 +184,23 @@ async function executeSqlCommand(sql_command) {
         return null;
     }
 }
+
+// personnel
+
+personnelTabButtonAerzte         = document.getElementById('aerzte-tab-button-2');
+personnelTabButtonKrankenpfleger = document.getElementById('krankenpfleger-tab-button');
+personnelTabButtonAerzte.addEventListener('click', (e) => {
+    e.preventDefault();
+    showElementById('aerztetab');
+    hideElementById('krankenpflegertab');
+});
+
+personnelTabButtonKrankenpfleger.addEventListener('click', (e) => {
+    e.preventDefault();
+    showElementById('krankenpflegertab');
+    hideElementById('aerztetab');
+});
+
 
 personnelCreateTableButton = document.getElementById('createTableButton');
 personnelCreateTableButton.addEventListener('click', async () => {
