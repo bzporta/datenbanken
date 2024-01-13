@@ -18,6 +18,10 @@ function init() {
 }
 
 function setupHomePage() {
+    createTabButtons = document.querySelectorAll('.createTableButton');
+    createTabButtons.forEach(button => {
+        button.click();
+    });
     setupFirstTab();  
 }
 
@@ -272,6 +276,15 @@ deletePatientForm.addEventListener('submit', (e) => {
     executeSqlCommand(query);
     patientCreateTableButton.click();
     deletePatientForm.reset();
+});
+
+// Patient Details
+// Show Patient Details
+showDetailsForm = document.getElementById('patientenauswahlform');
+showDetailsForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    showElementById('patientenDetailsTab');
+    hideElementById('patiententab');
 });
 
 // Diagnosis

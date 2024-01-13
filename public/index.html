@@ -92,11 +92,13 @@
 
             <div class="content-box">
                 <!-- Patients -->
-                <div class="content" id="patiententab">
-                    <div class="wrapper">
-                        <h2>Patienten</h2>
+                <div class="content">
+                    <div class="content2" id="patiententab">
 
-                        <form action="" id="patienten-form">
+                        <div class="wrapper">
+                            <h2>Patienten</h2>
+                            
+                            <form action="" id="patienten-form">
                             <div class="form-box">
                                 <label for="name">Name</label>
                                 <input type="text" id="name" name="name" placeholder="Name, Vorname" required>
@@ -140,23 +142,30 @@
                                     <option value="Unknown">Unknown</option>
                                 </select>
                             </div>
-
+                            
                             <button type="submit" class="btn">Add Patient</button>
-                        </form>   
-                        <!-- Deleteform -->
-                        <form action="">
-                            <label for="patientendelete">Patienten-Id</label>
-                            <input type="text" id="patientendelete" name="patientendelete" placeholder="Patienten-Id" required>
-                            <button type="submit" class="btn">Delete Patient</button>
-                        </form>
+                            </form>   
+                            <!-- Deleteform -->
+                            <form action="">
+                                <label for="patientendelete">Patienten-Id</label>
+                                <input type="text" id="patientendelete" name="patientendelete" placeholder="Patienten-Id" required>
+                                <button type="submit" class="btn">Delete Patient</button>
+                            </form>
                         
-                        <button class="btn createTableButton">CreateTable</button>
-                    </div>
-
-                    <div>
-                        <div class="wrapper">
-                            Siehst du das?
-
+                            <button class="btn createTableButton">CreateTable</button>
+                        </div>
+                    
+                        <div class="patienten-tableside">
+                            <div class="wrapper patientenauswahl">
+                                <form action="" id="patientenauswahlform">
+                                    <div class="form-box2">
+                                        <label for="choosePatientId">Patienten-Id</label>
+                                        <input type="text" id="choosePatientId" name="choosePatientId" placeholder="Patient-Id" required>
+                                    </div>
+                                    <button type="submit" class="btn">Show Details</button>
+                                </form>
+                            </div>
+                            
                             <div class="table-container">
                                 <table id="patienten-table">
                                     <thead></thead>
@@ -165,11 +174,18 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div class="content2" id="patientenDetailsTab">
+                        asdasd
+                        <button class="closeButton btn">
+                            Close
+                        </button>
+                    </div>
+                </div>
+                
                 <!-- Stations -->
                 <div class="content">
-
+                    
                 </div>
                 
                 <!-- Personell -->
@@ -225,7 +241,7 @@
                                 <input type="text" id="mitarbeiteridDelete" name="mitarbeiteridDelete" placeholder="Mitarbeiter-Id" required>
                                 <button type="submit" class="btn">Delete Personnel</button>
                             </form>
-                            <button id="createTableButton" class="btn">CreateTable</button>
+                            <button id="createTableButton" class="btn createTableButton">CreateTable</button>
                         </div>
                             
                         <div class="table-container">
@@ -311,7 +327,7 @@
                                 <input type="date" id="diagnosisdate" name="diagnosesdate" required>
                             </div>
                             <div class="form-box">
-                                <label for="Description">Description</label>
+                                <label for="diagnosisdescription">Description</label>
                                 <textarea class="input-textarea" id="diagnosisdescription" name="diagnosisdescription" rows="5" required></textarea>
                             </div>
                             <div class="form-box">
