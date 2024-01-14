@@ -7,8 +7,8 @@ const loginButton = document.querySelector('form-box.login form button');
 const loginForm = document.querySelector('.form-box.login form');
 const homepageTabs = document.querySelectorAll('.home-page header .tablink');
 const signOutButtons = document.querySelectorAll('.sign-out-button');
-const homepageContents = document.querySelectorAll('.home-page .content-box > .content');
-
+const homepageContents = document.querySelectorAll('.home-page .content-box .content');
+console.log(homepageContents.length);
 let currentTab = 0;
 
 function init() {
@@ -19,9 +19,12 @@ function init() {
 
 function setupHomePage() {
     createTabButtons = document.querySelectorAll('.createTableButton');
+    createTabForms   = document.querySelectorAll('.createTabForm');
     createTabButtons.forEach(button => {
         button.click();
     });
+    setupPatientsTable();
+    
     setupFirstTab();  
 }
 
@@ -221,14 +224,72 @@ aufnahmedatumDatePicker = document.getElementById('patientenaufnahmedatum');
 aufnahmedatumDatePicker.value = new Date().toISOString().slice(0, 10);
 // Createtable Patient
 
-patientCreateTableButton = document.querySelector('#patiententab .wrapper .createTableButton');
-patientCreateTableButton.addEventListener('click', async() => {
+patientCreateTableForm = document.getElementById('createPatientTableForm');
+patientCreateTableForm.addEventListener('submit', async(e) => {
+    e.preventDefault();
     var result = await executeSqlCommand(
-        `SELECT PATIENTEN_ID, KRANKENHAUS_ID, PATIENTENRAUM_ID, NAME, SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, GESCHLECHT, SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, BLUTGRUPPE
-        FROM "MIPM"."PATIENT"`
+        `SELECT PATIENTEN_ID, 
+        KRANKENHAUS_ID, 
+        PATIENTENRAUM_ID, 
+        NAME, 
+        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        CASE
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN GESCHLECHT = 0 THEN 'Männlich'
+            WHEN GESCHLECHT = 2 THEN 'Divers'
+            ELSE 'Unbekannt'
+        END AS GESCHLECHT,
+        SUBSTR(GEBURTSDATUM ,0,10) AS GEBURTSDATUM, 
+        BLUTGRUPPE
+        FROM "MIPM"."PATIENT"
+        ORDER BY ${patientCreateTableForm.patientOrderBy.value}`
     )
     constructTable(result, 'patienten-table');
 });
+
+async function setupPatientsTable() {
+    var result = await executeSqlCommand(
+        `SELECT PATIENTEN_ID, 
+        KRANKENHAUS_ID, 
+        PATIENTENRAUM_ID, 
+        NAME, 
+        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        CASE
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN GESCHLECHT = 0 THEN 'Männlich'
+            WHEN GESCHLECHT = 2 THEN 'Divers'
+            ELSE 'Unbekannt'
+        END AS GESCHLECHT,
+        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+        BLUTGRUPPE
+        FROM "MIPM"."PATIENT"`
+    )
+    constructTable(result, 'patienten-table');
+}
+
+// patientCreateTableButton = document.querySelector('#patiententab .wrapper .createTableButton');
+// patientCreateTableButton.addEventListener('click', async() => {
+//     var result = await executeSqlCommand(
+//         `SELECT PATIENTEN_ID, 
+//         KRANKENHAUS_ID, 
+//         PATIENTENRAUM_ID, 
+//         NAME, 
+//         SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+//         SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+//         CASE
+//             WHEN GESCHLECHT = 1 THEN 'Weiblich'
+//             WHEN GESCHLECHT = 0 THEN 'Männlich'
+//             WHEN GESCHLECHT = 2 THEN 'Divers'
+//             ELSE 'Unbekannt'
+//         END AS GESCHLECHT,
+//         SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+//         BLUTGRUPPE
+//         FROM "MIPM"."PATIENT"`
+//     )
+//     constructTable(result, 'patienten-table');
+// });
 
 // Add Patient
 
@@ -269,6 +330,7 @@ deletePatientForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
+    DELETE FROM "MIPM"."DIAGNOSE" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
     DELETE FROM "MIPM"."PATIENT" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
     COMMIT;
     END;`;
@@ -283,9 +345,73 @@ deletePatientForm.addEventListener('submit', (e) => {
 showDetailsForm = document.getElementById('patientenauswahlform');
 showDetailsForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    showElementById('patientenDetailsTab');
+    createPatientDetailsTable();
+    createPatientDiagnosesTable();
+    showElementByIdDisplay('patientenDetailsTab', 'flex');
     hideElementById('patiententab');
 });
+
+
+function calculateAge(birthday) { // birthday is a date
+    var ageDifMs = Date.now() - new Date(birthday).getTime();
+    var ageDate = new Date(ageDifMs); // miliseconds from epoch
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
+
+async function createPatientDiagnosesTable() {
+    var result = await executeSqlCommand(
+        `SELECT 
+        D.*,
+        LISTAGG(O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS BEHANDLUNGS_IDS
+    FROM
+        DIAGNOSE D
+    JOIN
+        OPERATION_DIAGNOSE R ON D.DIAGNOSE_ID = R.DIAGNOSE_ID
+    JOIN
+        OPERATION O ON R.BEHANDLUNGS_ID = O.BEHANDLUNGS_ID
+    GROUP BY
+        D.DIAGNOSE_ID, -- Füge alle anderen Gruppierungsattribute hier hinzu
+        D.MITARBEITER_NR,
+        D.DIAGNOSE_DATUM,
+        D.BESCHREIBUNG,
+        D.STATUS,
+        D.PATIENTEN_ID
+        `
+    )
+
+    constructTable(result, 'patientenDiagnoses-table');
+}
+
+async function createPatientDetailsTable() {
+    var result = await executeSqlCommand(
+        `SELECT PATIENTEN_ID, 
+        KRANKENHAUS_ID, 
+        PATIENTENRAUM_ID, 
+        NAME, 
+        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        CASE
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN GESCHLECHT = 0 THEN 'Männlich'
+            WHEN GESCHLECHT = 2 THEN 'Divers'
+            ELSE 'Unbekannt'
+        END AS GESCHLECHT,
+        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+        BLUTGRUPPE
+        FROM "MIPM"."PATIENT"
+        WHERE PATIENTEN_ID = ${showDetailsForm.choosePatientId.value}`
+    )
+    constructTable(result, 'patientenDetails-table');
+}
+
+// Patientdetailsclose
+
+patientDetailsCloseButton = document.querySelector('#patientenDetailsTab .wrapper .closeButton');
+patientDetailsCloseButton.addEventListener('click', () => {
+    showElementByIdDisplay('patiententab', 'flex');
+    hideElementById('patientenDetailsTab');
+});
+
 
 // Diagnosis
 

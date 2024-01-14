@@ -99,51 +99,51 @@
                             <h2>Patienten</h2>
                             
                             <form action="" id="patienten-form">
-                            <div class="form-box">
-                                <label for="name">Name</label>
-                                <input type="text" id="name" name="name" placeholder="Name, Vorname" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="patientenKrankenhausId">Krankenhaus-Id</label>
-                                <input type="text" id="patientenKrankenhausId" name="patientenKrankenhausId" placeholder="Krankenhaus-Id" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="patientenRaumId">Krankenhaus-Id</label>
-                                <input type="text" id="patientenRaumId" name="patientenRaumId" placeholder="Raum-Id" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="patientenaufnahmedatum">Aufnahmedatum</label>
-                                <input type="date" id="patientenaufnahmedatum" name="patientenaufnahmedatum" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="patientenentlassungsdatum">Entlassungsdatum</label>
-                                <input type="date" id="patientenentlassungsdatum" name="patientenentlassungsdatum">
-                            </div>
-                            <div class="form-box">
-                                <label for="patientengeschlecht">Geschlecht</label>
-                                <select name="patientengeschlecht" id="patientengeschlecht" required>
-                                    <option value="">--Select a gender--</option>
-                                    <option value="0">Männlich</option>
-                                    <option value="1">Weiblich</option>
-                                    <option value="2">Divers</option>
-                                </select>
-                            </div>
-                            <div class="form-box">
-                                <label for="patientengeburtsdatum">Geburtsdatum</label>
-                                <input type="date" id="patientengeburtsdatum" name="patientengeburtsdatum" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="patientenblutgruppe">Blutgruppe</label>
-                                <select name="patientenblutgruppe" id="patientenblutgruppe">
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="AB">AB</option>
-                                    <option value="0">0</option>
-                                    <option value="Unknown">Unknown</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn">Add Patient</button>
+                                <div class="form-box">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" name="name" placeholder="Name, Vorname" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientenKrankenhausId">Krankenhaus-Id</label>
+                                    <input type="text" id="patientenKrankenhausId" name="patientenKrankenhausId" placeholder="Krankenhaus-Id" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientenRaumId">Krankenhaus-Id</label>
+                                    <input type="text" id="patientenRaumId" name="patientenRaumId" placeholder="Raum-Id" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientenaufnahmedatum">Aufnahmedatum</label>
+                                    <input type="date" id="patientenaufnahmedatum" name="patientenaufnahmedatum" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientenentlassungsdatum">Entlassungsdatum</label>
+                                    <input type="date" id="patientenentlassungsdatum" name="patientenentlassungsdatum">
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientengeschlecht">Geschlecht</label>
+                                    <select name="patientengeschlecht" id="patientengeschlecht" required>
+                                        <option value="">--Select a gender--</option>
+                                        <option value="0">Männlich</option>
+                                        <option value="1">Weiblich</option>
+                                        <option value="2">Divers</option>
+                                    </select>
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientengeburtsdatum">Geburtsdatum</label>
+                                    <input type="date" id="patientengeburtsdatum" name="patientengeburtsdatum" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="patientenblutgruppe">Blutgruppe</label>
+                                    <select name="patientenblutgruppe" id="patientenblutgruppe">
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="AB">AB</option>
+                                        <option value="0">0</option>
+                                        <option value="Unknown">Unknown</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn">Add Patient</button>
                             </form>   
                             <!-- Deleteform -->
                             <form action="">
@@ -151,8 +151,22 @@
                                 <input type="text" id="patientendelete" name="patientendelete" placeholder="Patienten-Id" required>
                                 <button type="submit" class="btn">Delete Patient</button>
                             </form>
-                        
-                            <button class="btn createTableButton">CreateTable</button>
+                            
+                            <form action="" class="createTabForm" id="createPatientTableForm">
+                                <label for="patientOrderBy">Sortiert nach</label>
+                                <select name="patientOrderBy" id="patientOrderBy">
+                                    <option value="KRANKENHAUS_ID">Krankenhaus-Id</option>
+                                    <option value="PATIENTEN_ID">Patienten-Id</option>
+                                    <option value="PATIENTENRAUM_ID">Raum-Id</option>
+                                    <option value="NAME">Name</option>
+                                    <option value="AUFNAHME_DATUM">Aufnahmedatum</option>
+                                    <option value="ENTLASSUNGS_DATUM">Entlassungsdatum</option>
+                                    <option value="GESCHLECHT">Geschlecht</option>
+                                    <option value="GEBURTSDATUM">Geburtsdatum</option>
+                                    <option value="BLUTRGRUPPE">Blutgruppe</option>
+                                </select>
+                                <button type="submit" class="btn">CreateTable</button>
+                            </form>
                         </div>
                     
                         <div class="patienten-tableside">
@@ -176,16 +190,43 @@
                     </div>
 
                     <div class="content2" id="patientenDetailsTab">
-                        asdasd
-                        <button class="closeButton btn">
-                            Close
-                        </button>
+                        
+                        <div class="wrapper">
+                            <div class="closeButtonContainer">
+                                <button class="btn closeButton">Close</button>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table id="patientenDetails-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            
+                            <h2>Diagnosen</h2>
+                            <div class="table-container">
+                                <table id="patientenDiagnoses-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div class="wrapper behandlungsauswahl">
+                                <form action="" id="behandlungsauswahlform">
+                                    <div class="form-box2">
+                                        <label for="chooseBehandlungsId">Behandlungs-Id</label>
+                                        <input type="text" id="chooseBehandlungsId" name="chooseBehandlungsId" placeholder="Behandlungs-Id" required>
+                                    </div>
+                                    <button type="submit" class="btn">Show Details</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Stations -->
                 <div class="content">
-                    
+                    asd
                 </div>
                 
                 <!-- Personell -->
