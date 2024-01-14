@@ -100,7 +100,37 @@ body {
 
 /* Patienten */
 
+.popup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 999;
+  display: none;
+}
+
+.popup .wrapper {
+  background:rgba(255, 255, 255, 1);
+  backdrop-filter: blur(5px);
+  pointer-events: all;
+}
+
+.h2row {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+}
+
 #patientenauswahlform {
+  display: flex;
+  align-items: center;
+}
+
+#behandlungsauswahlform {
   display: flex;
   align-items: center;
 }
@@ -122,6 +152,10 @@ body {
 .patienten-tableside {
   flex: 1;
   margin-right: 20px;
+}
+
+#patientenDetailsTab h2 {
+  margin: 30px;
 }
 
 
@@ -150,7 +184,7 @@ body {
 
 .form-box2 {
   display: inline-block;
-  width: 500px;
+  width: 600px;
 }
 
 .form-box2 label {
@@ -275,6 +309,7 @@ td {
   color: black;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+  height: 92px;
 }
 
 .wrapper {
@@ -295,6 +330,10 @@ td {
   align-items: center;
   justify-content: left;
   margin: 0px 30px;
+}
+
+#patientenDetailsTab > .wrapper {
+  width: 100%;
 }
 
 .wrapper.behandlungsauswahl {
@@ -339,9 +378,6 @@ td {
   width: fit-content;
 }
 
-#patientenDetailsTab .wrapper {
-  width: 100%;
-}
 
 .input-box input {
   width: 100%;
@@ -416,6 +452,10 @@ td {
   margin-top: 10px;
 }
 
+.h2row .btn {
+  width: 300px;
+}
+
 .btn.closeButton {
   background:rgb(226, 62, 87);
   color: white;
@@ -426,6 +466,10 @@ td {
   }
 
   align-self: flex-end;
+}
+
+#addOperationDiv {
+  display: none;
 }
 
 .closeButtonContainer {

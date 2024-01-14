@@ -81,9 +81,7 @@
                     <button class="tablink">Patients</button>
                     <button class="tablink">Stations</button>
                     <button class="tablink">Personnel</button>
-                    <button class="tablink">Diagnoses</button>
                     <button class="tablink">Treatments</button>
-                    <button class="tablink">Booking</button>
                     <button class="sign-out-button">Sign out</button>
                 </div>
                 <div class="line"></div>
@@ -108,7 +106,7 @@
                                     <input type="text" id="patientenKrankenhausId" name="patientenKrankenhausId" placeholder="Krankenhaus-Id" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="patientenRaumId">Krankenhaus-Id</label>
+                                    <label for="patientenRaumId">Raum-Id</label>
                                     <input type="text" id="patientenRaumId" name="patientenRaumId" placeholder="Raum-Id" required>
                                 </div>
                                 <div class="form-box">
@@ -155,15 +153,15 @@
                             <form action="" class="createTabForm" id="createPatientTableForm">
                                 <label for="patientOrderBy">Sortiert nach</label>
                                 <select name="patientOrderBy" id="patientOrderBy">
-                                    <option value="KRANKENHAUS_ID">Krankenhaus-Id</option>
-                                    <option value="PATIENTEN_ID">Patienten-Id</option>
+                                    <option value="KRANKENHAUSNAME">Krankenhaus-Name</option>
+                                    <option value="PATIENTENRAUM">Patientenraum</option>
                                     <option value="PATIENTENRAUM_ID">Raum-Id</option>
                                     <option value="NAME">Name</option>
                                     <option value="AUFNAHME_DATUM">Aufnahmedatum</option>
                                     <option value="ENTLASSUNGS_DATUM">Entlassungsdatum</option>
                                     <option value="GESCHLECHT">Geschlecht</option>
                                     <option value="GEBURTSDATUM">Geburtsdatum</option>
-                                    <option value="BLUTRGRUPPE">Blutgruppe</option>
+                                    <option value="BLUTGRUPPE">Blutgruppe</option>
                                 </select>
                                 <button type="submit" class="btn">CreateTable</button>
                             </form>
@@ -192,6 +190,7 @@
                     <div class="content2" id="patientenDetailsTab">
                         
                         <div class="wrapper">
+                            <h1>Patientenakte</h1>
                             <div class="closeButtonContainer">
                                 <button class="btn closeButton">Close</button>
                             </div>
@@ -202,8 +201,11 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
-                            
-                            <h2>Diagnosen</h2>
+                            <div class="h2row">
+                                <h2>Diagnosis</h2>
+                                <button class="btn">Add Diagnosis</button>
+                                <button class="btn">Refresh Diagnosis</button>
+                            </div>
                             <div class="table-container">
                                 <table id="patientenDiagnoses-table">
                                     <thead></thead>
@@ -211,8 +213,39 @@
                                 </table>
                             </div>
 
+                            <div class="popup" id="addDiagnosisPopup">
+                                <div class="wrapper">
+                                    <h2>Diagnoses</h2>
+                                    <div class="closeButtonContainer">
+                                        <button class="btn closeButton">Close</button>
+                                    </div>
+                                    <form action="" id="addDiagnosis-form">
+                                        <div class="form-box">
+                                            <label for="diagnosisMitarbeiterNr">Mitarbeiter Nummer</label>
+                                            <input type="text" id="diagnosisMitarbeiterNr" name="diagnosisMitarbeiterNr" placeholder="Mitarbeiter Nummer" required>
+                                        </div>
+                                        <div class="form-box">
+                                            <label for="diagnosisdate">Date</label>
+                                            <input type="date" id="diagnosisdate" name="diagnosesdate" required>
+                                        </div>
+                                        <div class="form-box">
+                                            <label for="diagnosisdescription">Description</label>
+                                            <textarea class="input-textarea" id="diagnosisdescription" name="diagnosisdescription" rows="5" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn">Add Diagnosis</button>
+                                    </form>
+                                </div>
+                            </div>
+
                             <div class="wrapper behandlungsauswahl">
                                 <form action="" id="behandlungsauswahlform">
+                                    <div class="form-box2">
+                                        <label for="behandlungstypauswahl">Behandlungsart</label>
+                                        <select name="behandlundgstypauswahl" id="behandlungstypauswahl">
+                                            <option value="OPERATION">Operation</option>
+                                            <option value="THERAPIE">Therapie</option>
+                                        </select>
+                                    </div>
                                     <div class="form-box2">
                                         <label for="chooseBehandlungsId">Behandlungs-Id</label>
                                         <input type="text" id="chooseBehandlungsId" name="chooseBehandlungsId" placeholder="Behandlungs-Id" required>
@@ -220,13 +253,107 @@
                                     <button type="submit" class="btn">Show Details</button>
                                 </form>
                             </div>
+
+                            <div class="h2row">
+                                <h2>Details</h2>
+                                <button class="btn" id="addTreatmentButton">Add Treatment</button>
+                                <button class="btn" id="refreshTreatmentButton">Refresh Treatments</button>
+                            </div>
+                            <div class="table-container">
+                                <table id="patientenBehandlung-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div class="popup" id="addTreatmentPopup">
+                                <div class="wrapper">
+                                    <h2>Treatments</h2>
+                                    <div class="closeButtonContainer">
+                                        <button class="btn closeButton" id="closeTreatmentPopup">Close</button>
+                                        <button class="btn closeButton" id="toggleAddTreatment">Operation</button>
+                                    </div>
+
+                                    <div id="addTherapieDiv">
+                                        <h2>Therapie</h2>
+                                        <form action="" id="addTherapie-form">
+                                            <!-- <div class="form-box">
+                                                <label for="therapieMitarbeiterNr">Mitarbeiter Nummer</label>
+                                                <input type="text" id="therapieMitarbeiterNr" name="therapieMitarbeiterNr" placeholder="Mitarbeiter Nummer" required>
+                                            </div> -->
+                                            <div class="form-box">
+                                                <label for="therapieBezeichnung">Titel</label>
+                                                <textarea class="input-textarea" name="therapieBezeichnung" id="therapieBezeichnung" rows="1" required></textarea>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="therapieInfo">Beschreibung</label>
+                                                <textarea class="input-textarea" id="therapieInfo" name="therapieInfo" rows="5" required></textarea>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="therapieStartZeit">Anfangsdatum</label>
+                                                <input type="date" id="therapieStartZeit" name="therapieStartZeit" required>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="therapieEndZeit">Enddatum</label>
+                                                <input type="date" id="therapieEndZeit" name="therapieEndZeit" required>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="therapieDiagnoseId">Diagnose-Id</label>
+                                                <input type="number" id="therapieDiagnoseId" name="therapieDiagnoseId" min="1" required>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="therapieAnzahlPersonal">Benötigte Pfleger</label>
+                                                <input type="number" id="therapieAnzahlPersonal" name="therapieAnzahlPersonal" min="1" required>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="therapieBerechtigung">Berechtigung</label>
+                                                <select name="therapieBerechtigung" id="therapieBerechtigung" required>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                </select>
+                                            </div>
+
+                                            <button type="submit" class="btn">Add Treatment</button>
+                                        </form>
+                                    </div>
+
+                                    <div id="addOperationDiv">
+                                        <h2>Operation</h2>
+                                        <form action="" id="addOperation-form">
+                                            <div class="form-box">
+                                                <label for="diagnosisMitarbeiterNr">Mitarbeiter Nummer</label>
+                                                <input type="text" id="diagnosisMitarbeiterNr" name="diagnosisMitarbeiterNr" placeholder="Mitarbeiter Nummer" required>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="diagnosisdate">Date</label>
+                                                <input type="date" id="diagnosisdate" name="diagnosesdate" required>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="diagnosisdescription">Description</label>
+                                                <textarea class="input-textarea" id="diagnosisdescription" name="diagnosisdescription" rows="5" required></textarea>
+                                            </div>
+                                            <button type="submit" class="btn">Add Treatment</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                
+
+                            </div>
+
+                            
+
                         </div>
                     </div>
                 </div>
                 
                 <!-- Stations -->
                 <div class="content">
-                    asd
+                    <div id="stationtab" class="content2">
+                        
+                    </div>
+
                 </div>
                 
                 <!-- Personell -->
@@ -356,43 +483,6 @@
                     </div>
                 </div>
 
-
-                <!-- Diagnoses -->
-                <div class="content">
-                    <div class="wrapper">
-                        <h2>Diagnoses</h2>
-
-                        <form action="" id="diagnoses-form">
-                            <div class="form-box">
-                                <label for="diagnosisdate">Date</label>
-                                <input type="date" id="diagnosisdate" name="diagnosesdate" required>
-                            </div>
-                            <div class="form-box">
-                                <label for="diagnosisdescription">Description</label>
-                                <textarea class="input-textarea" id="diagnosisdescription" name="diagnosisdescription" rows="5" required></textarea>
-                            </div>
-                            <div class="form-box">
-                                <label for="diagnosisstatus">Status</label>
-                                <select name="diagnosisstatus" id="diagnosisstatus" required>
-                                    <option value="">--Please choose an option--</option>
-                                    <option value="0">Treatment completed</option>
-                                    <option value="1">No Treatment</option>
-                                    <option value="2">In Progress</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn">Add Personnel</button>
-                        </form>
-                        <button id="createTableButton" class="btn">CreateTable</button>
-                    </div>
-                    <div class="table-container">
-                        <table id="diagnoses-table">
-                            <thead></thead>
-                            <tbody></tbody>
-                        </table>      
-                    </div>
-                </div>
-
                 <!-- Treatments -->
                 <div class="content">
                     <div id="therapietab">
@@ -426,7 +516,7 @@
                                 
                                 <button type="submit" class="btn">Add Personnel</button>
                             </form>
-                            <button id="createTableButton" class="btn">CreateTable</button>
+                            <button class="btn">CreateTable</button>
                         </div>
                         <div class="table-container">
                             <table id="treatments-table">
@@ -467,7 +557,7 @@
                                 
                                 <button type="submit" class="btn">Add Personnel</button>
                             </form>
-                            <button id="createTableButton" class="btn">CreateTable</button>
+                            <button class="btn">CreateTable</button>
                         </div>
                         <div class="table-container">
                             <table id="treatments-table">

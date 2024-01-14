@@ -10,6 +10,7 @@ const signOutButtons = document.querySelectorAll('.sign-out-button');
 const homepageContents = document.querySelectorAll('.home-page .content-box .content');
 console.log(homepageContents.length);
 let currentTab = 0;
+var patientId;
 
 function init() {
     showSinglePage('login-page');
@@ -187,6 +188,7 @@ function constructTable(data, table_id) {
 }
 
 async function executeSqlCommand(sql_command) {
+    logSqlCommand(sql_command);
     var result = await fetch('/api/sql', {
         method: "POST",
         headers: {
@@ -200,6 +202,13 @@ async function executeSqlCommand(sql_command) {
     catch {
         return null;
     }
+}
+
+function logSqlCommand(sql_command) {
+    const border = '#'.repeat(60);
+    console.log('\x1b[32m%s\x1b[0m',`${border}\n
+                 ${sql_command}\n
+                 ${border}`);
 }
 
 // Treatment
@@ -227,33 +236,12 @@ aufnahmedatumDatePicker.value = new Date().toISOString().slice(0, 10);
 patientCreateTableForm = document.getElementById('createPatientTableForm');
 patientCreateTableForm.addEventListener('submit', async(e) => {
     e.preventDefault();
-    var result = await executeSqlCommand(
-        `SELECT PATIENTEN_ID, 
-        KRANKENHAUS_ID, 
-        PATIENTENRAUM_ID, 
-        NAME, 
-        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
-        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
-        CASE
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN GESCHLECHT = 0 THEN 'Männlich'
-            WHEN GESCHLECHT = 2 THEN 'Divers'
-            ELSE 'Unbekannt'
-        END AS GESCHLECHT,
-        SUBSTR(GEBURTSDATUM ,0,10) AS GEBURTSDATUM, 
-        BLUTGRUPPE
-        FROM "MIPM"."PATIENT"
-        ORDER BY ${patientCreateTableForm.patientOrderBy.value}`
-    )
-    constructTable(result, 'patienten-table');
-});
 
-async function setupPatientsTable() {
     var result = await executeSqlCommand(
-        `SELECT PATIENTEN_ID, 
-        KRANKENHAUS_ID, 
-        PATIENTENRAUM_ID, 
-        NAME, 
+        `SELECT PATIENT.PATIENTEN_ID, 
+        K.NAME AS KRANKENHAUSNAME, 
+        S.STATIONS_NAME || '-' || PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
+        PATIENT.NAME, 
         SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
         SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
         CASE
@@ -264,7 +252,36 @@ async function setupPatientsTable() {
         END AS GESCHLECHT,
         SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
         BLUTGRUPPE
-        FROM "MIPM"."PATIENT"`
+        FROM "MIPM"."PATIENT"
+        JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+        ORDER BY "MIPM"."PATIENT".${patientCreateTableForm.patientOrderBy.value}`
+    )
+    constructTable(result, 'patienten-table');
+});
+
+async function setupPatientsTable() {
+    var result = await executeSqlCommand(
+        `SELECT PATIENT.PATIENTEN_ID, 
+        K.NAME AS KRANKENHAUSNAME, 
+        S.STATIONS_NAME || '-' || PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
+        PATIENT.NAME, 
+        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        CASE
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN GESCHLECHT = 0 THEN 'Männlich'
+            WHEN GESCHLECHT = 2 THEN 'Divers'
+            ELSE 'Unbekannt'
+        END AS GESCHLECHT,
+        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+        BLUTGRUPPE
+        FROM "MIPM"."PATIENT"
+        JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+        `
     )
     constructTable(result, 'patienten-table');
 }
@@ -345,12 +362,125 @@ deletePatientForm.addEventListener('submit', (e) => {
 showDetailsForm = document.getElementById('patientenauswahlform');
 showDetailsForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    patientId = showDetailsForm.choosePatientId.value;
     createPatientDetailsTable();
     createPatientDiagnosesTable();
     showElementByIdDisplay('patientenDetailsTab', 'flex');
     hideElementById('patiententab');
+
 });
 
+// Show Patient treatments
+showTreatmentForm = document.getElementById('behandlungsauswahlform');
+showTreatmentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const result =  await executeSqlCommand(
+        `SELECT *
+        FROM ${showTreatmentForm.behandlungstypauswahl.value}
+        WHERE BEHANDLUNGS_ID = ${showTreatmentForm.chooseBehandlungsId.value}`);
+    
+    constructTable(result, 'patientenBehandlung-table');
+});
+
+// Add Patient Treatment
+
+// addTreatmentForm = document.getElementById('addTreatment-form');
+// addTreatmentForm.addEventListener('submit', (e) => {
+
+addTherapieForm = document.getElementById('addTherapie-form');
+addTherapieForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // const krankenhaus_id = await executeSqlCommand(`SELECT KRANKENHAUS_ID FROM PATIENT WHERE PATIENTEN_ID = ${patientId}`);
+
+    krankenhaus_id = 1;
+
+    
+    const mitarberbeiternr = await executeSqlCommand(
+        `
+        SELECT KP.MITARBEITER_NR
+        FROM KRANKENPFLEGER KP
+        JOIN PATIENT P ON kp.krankenhaus_id = ${krankenhaus_id}
+        WHERE berechtigungen >= ${addTherapieForm.therapieBerechtigung.value}
+        AND p.patienten_id = ${patientId}
+        ORDER BY DBMS_RANDOM.RANDOM
+        FETCH FIRST ${addTherapieForm.therapieAnzahlPersonal.value} ROWS ONLY`
+        
+    );
+    
+    // console.log(await executeSqlCommand(
+    //     `
+    //     -- Temporäre Tabelle erstellen, falls sie noch nicht existiert
+    //     CREATE GLOBAL TEMPORARY TABLE temp_behandlungs_id (
+    //         behandlungs_id NUMBER
+    //     ) ON COMMIT DELETE ROWS;
+
+    //     -- Direkt in die temporäre Tabelle einfügen
+    //     INSERT INTO temp_behandlungs_id (behandlungs_id)
+    //     SELECT BEHANDLUNGS_ID
+    //     FROM (
+    //         INSERT INTO "MIPM"."THERAPIE" (BEZEICHNUNG, INFO, STARTZEITPUNKT, BERECHTIGUNGSSTUFE, ENDZEITPUNKT)
+    //         VALUES ('test', 'test', TO_DATE('2024-01-14 20:26:21', 'YYYY-MM-DD HH24:MI:SS'),'3', TO_DATE('2024-01-21 20:26:29', 'YYYY-MM-DD HH24:MI:SS'))
+    //         RETURNING BEHANDLUNGS_ID
+    //     );
+
+    //     /
+    //     DELETE FROM temp_behandlungs_id;
+    //     `
+    //     ));
+        
+    // try{
+    // await executeSqlCommand(`
+    //   CREATE GLOBAL TEMPORARY TABLE temp_behandlungs_id (
+    //     behandlungs_id NUMBER
+    //   ) ON COMMIT DELETE ROWS`);
+    // } catch (error) {
+    //     console.log(error);
+    // }
+    // Behandlungs-ID in die Tabelle einfügen
+    const result = await executeSqlCommand(`
+      INSERT INTO "MIPM"."THERAPIE" (BEZEICHNUNG, INFO, STARTZEITPUNKT, BERECHTIGUNGSSTUFE, ENDZEITPUNKT)
+      VALUES ('test', 'test', TO_DATE('2024-01-14 20:26:21', 'YYYY-MM-DD HH24:MI:SS'),'3', TO_DATE('2024-01-21 20:26:29', 'YYYY-MM-DD HH24:MI:SS')
+      ) RETURNING BEHANDLUNGS_ID INTO :behandlungs_id`,
+      {
+        behandlungs_id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      }
+    );
+
+    // Behandlungs-ID aus dem Ergebnis abrufen
+    const behandlungsId = result.outBinds.behandlungs_id[0];
+
+    // Behandlungs-ID in die temporäre Tabelle einfügen
+    await executeSqlCommand(`INSERT INTO temp_behandlungs_id (behandlungs_id) VALUES (:behandlungs_id)`,
+      [behandlungsId]);
+
+    console.log(`Eingefügte BEHANDLUNGS_ID: ${behandlungsId}`);
+
+    // Tabelle leeren
+    await executeSqlCommand(`DELETE FROM temp_behandlungs_id`);
+
+        
+        
+        mitarberbeiternr.forEach(element => {
+            
+    }
+    );
+
+});
+
+
+// -- Ausgabe der Behandlungs-ID aus der temporären Tabelle
+// SELECT * FROM temp_behandlungs_id;
+
+// -- Temporäre Tabelle leeren
+// DELETE FROM temp_behandlungs_id;
+
+// -- Commit, um die Transaktion abzuschließen
+// COMMIT;
+
+// -- Temporäre Tabelle löschen (optional, wenn "ON COMMIT DELETE ROWS" verwendet wird)
+// -- DROP TABLE temp_behandlungs_id;
 
 function calculateAge(birthday) { // birthday is a date
     var ageDifMs = Date.now() - new Date(birthday).getTime();
@@ -359,24 +489,44 @@ function calculateAge(birthday) { // birthday is a date
 }
 
 async function createPatientDiagnosesTable() {
+    console.log(patientId);
     var result = await executeSqlCommand(
-        `SELECT 
-        D.*,
-        LISTAGG(O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS BEHANDLUNGS_IDS
-    FROM
-        DIAGNOSE D
-    JOIN
-        OPERATION_DIAGNOSE R ON D.DIAGNOSE_ID = R.DIAGNOSE_ID
-    JOIN
-        OPERATION O ON R.BEHANDLUNGS_ID = O.BEHANDLUNGS_ID
-    GROUP BY
-        D.DIAGNOSE_ID, -- Füge alle anderen Gruppierungsattribute hier hinzu
-        D.MITARBEITER_NR,
-        D.DIAGNOSE_DATUM,
-        D.BESCHREIBUNG,
-        D.STATUS,
-        D.PATIENTEN_ID
-        `
+    `SELECT 
+    D.DIAGNOSE_ID,
+    D.MITARBEITER_NR,
+    A.NAME || ', ' || A.VORNAME AS "DIAGNOSTIZIERENDER ARZT",
+    SUBSTR(D.DIAGNOSE_DATUM ,0,8) AS DIAGNOSEDATUM,
+    D.BESCHREIBUNG,
+    CASE
+        WHEN D.STATUS = 0 THEN 'Treatment Completed'
+        WHEN D.STATUS = 1 THEN 'No Treatment'
+        WHEN D.STATUS = 2 THEN 'Treatment in Progress'
+    END AS Diagnosestatus,
+    LISTAGG(O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS OPERATIONEN,
+    LISTAGG(DISTINCT T.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY T.BEHANDLUNGS_ID) AS THERAPIEN
+FROM
+    DIAGNOSE D
+JOIN
+    ARZT A ON D.MITARBEITER_NR = A.MITARBEITER_NR
+LEFT JOIN
+    OPERATION_DIAGNOSE R ON D.DIAGNOSE_ID = R.DIAGNOSE_ID
+LEFT JOIN
+    OPERATION O ON R.BEHANDLUNGS_ID = O.BEHANDLUNGS_ID
+LEFT JOIN
+    THERAPIE_DIAGNOSE TD ON D.DIAGNOSE_ID = TD.DIAGNOSE_ID
+LEFT JOIN
+    THERAPIE T ON TD.BEHANDLUNGS_ID = T.BEHANDLUNGS_ID
+WHERE 
+    D.PATIENTEN_ID = ${patientId}
+GROUP BY
+    D.DIAGNOSE_ID,
+    D.MITARBEITER_NR,
+    A.NAME,
+    A.VORNAME,
+    D.DIAGNOSE_DATUM,
+    D.BESCHREIBUNG,
+    D.STATUS
+    `
     )
 
     constructTable(result, 'patientenDiagnoses-table');
@@ -384,23 +534,31 @@ async function createPatientDiagnosesTable() {
 
 async function createPatientDetailsTable() {
     var result = await executeSqlCommand(
-        `SELECT PATIENTEN_ID, 
-        KRANKENHAUS_ID, 
-        PATIENTENRAUM_ID, 
-        NAME, 
-        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
-        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        `SELECT 
+        P.PATIENTEN_ID, 
+        P.NAME, 
+        K.NAME AS KRANKENHAUSNAME,  -- Hier wird der Name des Krankenhauses angezeigt
+        PR.RAUM_NR AS PATIENTENRAUM, 
+        SUBSTR(P.AUFNAHME_DATUM, 0, 8) AS AUFNAHMEDATUM, 
+        SUBSTR(P.ENTLASSUNGS_DATUM, 0, 8) AS ENTLASSUNGSDATUM, 
+        SUBSTR(P.GEBURTSDATUM, 0, 8) AS GEBURTSDATUM, 
         CASE
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN GESCHLECHT = 0 THEN 'Männlich'
-            WHEN GESCHLECHT = 2 THEN 'Divers'
+            WHEN P.GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN P.GESCHLECHT = 0 THEN 'Männlich'
+            WHEN P.GESCHLECHT = 2 THEN 'Divers'
             ELSE 'Unbekannt'
         END AS GESCHLECHT,
-        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
-        BLUTGRUPPE
-        FROM "MIPM"."PATIENT"
-        WHERE PATIENTEN_ID = ${showDetailsForm.choosePatientId.value}`
+        P.BLUTGRUPPE
+        FROM 
+            MIPM.PATIENT P
+        JOIN
+            MIPM.KRANKENHAUS K ON P.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN
+            MIPM.PATIENTENRAUM PR ON P.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        WHERE 
+            P.PATIENTEN_ID = ${patientId}`
     )
+
     constructTable(result, 'patientenDetails-table');
 }
 
@@ -411,6 +569,76 @@ patientDetailsCloseButton.addEventListener('click', () => {
     showElementByIdDisplay('patiententab', 'flex');
     hideElementById('patientenDetailsTab');
 });
+
+// Patientendiagnosesclose
+addDiagnosisPopupCloseButton = document.querySelector('#addDiagnosisPopup .closeButton');
+addDiagnosisPopupCloseButton.addEventListener('click', () => {
+    hideElementById('addDiagnosisPopup');
+});
+
+// PatientenaddDiagnoses
+addDiagnosisForm = document.getElementById('addDiagnosis-form');
+addDiagnosisForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const query = `BEGIN
+    INSERT INTO "MIPM"."DIAGNOSE" (MITARBEITER_NR, DIAGNOSE_DATUM, BESCHREIBUNG, STATUS, PATIENTEN_ID) 
+    VALUES (
+       '${addDiagnosisForm.diagnosisMitarbeiterNr.value}',
+       TO_DATE('${addDiagnosisForm.diagnosisdate.value} 00:00:00', 'YYYY-MM-DD HH24:MI:SS'),
+       '${addDiagnosisForm.diagnosisdescription.value}',
+       '1',
+       '${patientId}');
+       COMMIT;
+       END;`;
+                   
+    console.log(query);
+    executeSqlCommand(query);
+    createPatientDiagnosesTable();
+    addDiagnosisForm.reset();
+});
+
+
+// Patientendiagnoseopen
+openAddPatientButton = document.querySelector('#patientenDetailsTab .wrapper .h2row button:nth-of-type(1)');
+openAddPatientButton.addEventListener('click', () => {
+    showElementByIdDisplay('addDiagnosisPopup', 'flex');
+});
+
+// Refresh Patientendiagnose
+refreshDiagnosesButton = document.querySelector('#patientenDetailsTab .wrapper .h2row button:nth-of-type(2)');
+refreshDiagnosesButton.addEventListener('click', () => {
+    createPatientDiagnosesTable();
+});
+
+// Behandlungpopup open
+openAddTreatmentButton = document.getElementById('addTreatmentButton');
+openAddTreatmentButton.addEventListener('click', () => {
+    showElementByIdDisplay('addTreatmentPopup', 'flex');
+});
+
+// closeAddTreatmentButton = document.querySelector('#addTreatmentPopup .wrapper .closeButtonContainer .closeButton');
+closeAddTreatmentButton = document.getElementById('closeTreatmentPopup');
+closeAddTreatmentButton.addEventListener('click', () => {
+    hideElementById('addTreatmentPopup');
+});
+
+// Toggle Treatment
+toggleTreatmentButton = document.getElementById('toggleAddTreatment');
+toggleTreatmentButton.addEventListener('click', () => {
+    if (toggleTreatmentButton.textContent === 'Operation') {
+        toggleTreatmentButton.textContent = 'Therapie';
+        showElementById('addOperationDiv');
+        hideElementById('addTherapieDiv');
+    } else {
+        toggleTreatmentButton.textContent = 'Operation';
+        showElementById('addTherapieDiv');
+        hideElementById('addOperationDiv');
+    }
+});
+
+// Refresh Behandlung
+refreshTreatmentButton = document.getElementById('refreshTreatmentButton');
 
 
 // Diagnosis
@@ -468,9 +696,9 @@ krankenpflegerForm.addEventListener('submit', (e) => {
     krankenpflegerForm.reset();
 });
                 
-                // Delete krankenpfleger
-                deleteKrankenpflegerForm = document.querySelector('#krankenpflegertab .wrapper form:nth-of-type(2)');
-                deleteKrankenpflegerForm.addEventListener('submit', (e) => {
+// Delete krankenpfleger
+deleteKrankenpflegerForm = document.querySelector('#krankenpflegertab .wrapper form:nth-of-type(2)');
+deleteKrankenpflegerForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
