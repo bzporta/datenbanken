@@ -396,7 +396,7 @@ addTherapieForm.addEventListener('submit', async (e) => {
 
     krankenhaus_id = 1;
 
-    
+    // Ermitteln der genug qualifizierten Mitarbeiter
     const mitarberbeiternr = await executeSqlCommand(
         `
         SELECT KP.MITARBEITER_NR
@@ -408,64 +408,48 @@ addTherapieForm.addEventListener('submit', async (e) => {
         FETCH FIRST ${addTherapieForm.therapieAnzahlPersonal.value} ROWS ONLY`
         
     );
+
+    // Einfügen des Datensatzes in die Datenbank und Zurücklieferung der erstellten neuen ID
+    const response = await fetch('/sql/therapie', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            bezeichnung: `${addTherapieForm.therapieBezeichnung.value}`,
+            info: `${addTherapieForm.therapieInfo.value}`,
+            startzeitpunkt: `${addTherapieForm.therapieStartZeit.value} 00:00:00`,
+            berechtigungsstufe: `${addTherapieForm.therapieBerechtigung.value}`,
+            endzeitpunkt: `${addTherapieForm.therapieEndZeit.value} 00:00:00`
+        }),
+    });
+
+    var behandlungs_id = await response.json();
+    behandlungs_id = behandlungs_id.behandlungsId;
+
     
-    // console.log(await executeSqlCommand(
-    //     `
-    //     -- Temporäre Tabelle erstellen, falls sie noch nicht existiert
-    //     CREATE GLOBAL TEMPORARY TABLE temp_behandlungs_id (
-    //         behandlungs_id NUMBER
-    //     ) ON COMMIT DELETE ROWS;
-
-    //     -- Direkt in die temporäre Tabelle einfügen
-    //     INSERT INTO temp_behandlungs_id (behandlungs_id)
-    //     SELECT BEHANDLUNGS_ID
-    //     FROM (
-    //         INSERT INTO "MIPM"."THERAPIE" (BEZEICHNUNG, INFO, STARTZEITPUNKT, BERECHTIGUNGSSTUFE, ENDZEITPUNKT)
-    //         VALUES ('test', 'test', TO_DATE('2024-01-14 20:26:21', 'YYYY-MM-DD HH24:MI:SS'),'3', TO_DATE('2024-01-21 20:26:29', 'YYYY-MM-DD HH24:MI:SS'))
-    //         RETURNING BEHANDLUNGS_ID
-    //     );
-
-    //     /
-    //     DELETE FROM temp_behandlungs_id;
-    //     `
-    //     ));
-        
-    // try{
-    // await executeSqlCommand(`
-    //   CREATE GLOBAL TEMPORARY TABLE temp_behandlungs_id (
-    //     behandlungs_id NUMBER
-    //   ) ON COMMIT DELETE ROWS`);
-    // } catch (error) {
-    //     console.log(error);
-    // }
-    // Behandlungs-ID in die Tabelle einfügen
-    const result = await executeSqlCommand(`
-      INSERT INTO "MIPM"."THERAPIE" (BEZEICHNUNG, INFO, STARTZEITPUNKT, BERECHTIGUNGSSTUFE, ENDZEITPUNKT)
-      VALUES ('test', 'test', TO_DATE('2024-01-14 20:26:21', 'YYYY-MM-DD HH24:MI:SS'),'3', TO_DATE('2024-01-21 20:26:29', 'YYYY-MM-DD HH24:MI:SS')
-      ) RETURNING BEHANDLUNGS_ID INTO :behandlungs_id`,
-      {
-        behandlungs_id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-      }
-    );
-
-    // Behandlungs-ID aus dem Ergebnis abrufen
-    const behandlungsId = result.outBinds.behandlungs_id[0];
-
-    // Behandlungs-ID in die temporäre Tabelle einfügen
-    await executeSqlCommand(`INSERT INTO temp_behandlungs_id (behandlungs_id) VALUES (:behandlungs_id)`,
-      [behandlungsId]);
-
-    console.log(`Eingefügte BEHANDLUNGS_ID: ${behandlungsId}`);
-
-    // Tabelle leeren
-    await executeSqlCommand(`DELETE FROM temp_behandlungs_id`);
-
-        
-        
-        mitarberbeiternr.forEach(element => {
-            
+    
+    
+    // Eintragen der MitarbeiterIDs und der BehandlungsID in Zwischentabelle
+    mitarberbeiternr.forEach(element => {
+        executeSqlCommand(`
+        BEGIN
+        INSERT INTO "MIPM"."KRANKENPFLEGER_THERAPIE" (BEHANDLUNGS_ID, MITARBEITER_NR) 
+        VALUES (${behandlungs_id}, ${element.MITARBEITER_NR});
+        COMMIT;
+        END;
+        `);
     }
     );
+
+    // Eintragen der BEHANDLUNGS_ID und der DIAGNOSE_ID in die entsprechende Zwischentabelle
+    executeSqlCommand(`
+    BEGIN
+    INSERT INTO "MIPM"."THERAPIE_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID)
+    VALUES (${behandlungs_id}, ${addTherapieForm.therapieDiagnoseId.value});
+    COMMIT;
+    END;
+    `)
 
 });
 
