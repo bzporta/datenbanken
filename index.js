@@ -91,7 +91,7 @@ app.post('/api/sql',  async (req, res) => {
 
   } catch (error) {
     console.error('Fehler bei der Datenbankabfrage:', error);
-    res.json(null);
+    res.json(result.rows);
   }
 });
 

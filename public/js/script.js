@@ -15,7 +15,7 @@ var patientId;
 
 function init() {
     showSinglePage('login-page');
-    // showSinglePage('home-page');
+    //showSinglePage('home-page');
     setupHomePage();
 }
 
@@ -79,7 +79,6 @@ loginForm.addEventListener('submit', async (e) => {
 
     `);
 
-    console.log(result);
 
     if (result.length > 0 ) {
         document.getElementById('login-error').classList.add('hidden');
@@ -88,7 +87,7 @@ loginForm.addEventListener('submit', async (e) => {
     } else {
         document.getElementById('login-error').classList.remove('hidden');
     }
-
+    loginForm.reset();
 });
 
 registerForm.addEventListener('submit', async (e) => {
@@ -97,27 +96,31 @@ registerForm.addEventListener('submit', async (e) => {
     var benutzername = registerForm.username.value;
     var passwort = registerForm.password.value;
 
+    const preCheck = await executeSqlCommand(`
+    SELECT BENUTZERNAME
+    FROM BENUTZER
+    WHERE BENUTZERNAME = '${benutzername}'
+    `);
+
     
-    const result = await executeSqlCommand(`
+    if(preCheck.length > 0){
+        document.getElementById('register-error').classList.remove('hidden');
+        registerForm.reset();
+    }
+    else{
+        document.getElementById('register-error').classList.add('hidden');
+        loginLink.click();
+        registerForm.reset();
+        const result = await executeSqlCommand(`
         BEGIN
         INSERT INTO BENUTZER (BENUTZERNAME, PASSWORT)
         VALUES ('${benutzername}', '${passwort}');
         COMMIT;
         END;
-    `);
+        `);
 
-    console.log(result);
-    if(result != null){
-        document.getElementById('register-error').classList.add('hidden');
-        console.log('test');
-        loginLink.click();
-    }else{
-        document.getElementById('register-error').classList.remove('hidden');
     }
-
     
-
-
 });
 
 
@@ -126,12 +129,16 @@ registerLink.onclick = () => {
     wrapper.classList.add('active');
     showElement('.form-box.register');
     hideElement('.form-box.login');
+    document.getElementById('register-error').classList.add('hidden');
+    loginForm.reset();
 };
 
 loginLink.onclick = () => {
     // wrapper.classList.remove('active');
     showElement('.form-box.login');
     hideElement('.form-box.register');
+    document.getElementById('login-error').classList.add('hidden');
+    registerForm.reset();
 }
 
 function showElement(selector) {
