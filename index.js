@@ -85,13 +85,14 @@ app.post('/api/sql',  async (req, res) => {
 
     //console.log(req.body.sql_command);
     
+    res.json(result.rows);
   
     await connection.close();
 
   } catch (error) {
     console.error('Fehler bei der Datenbankabfrage:', error);
+    res.json(null);
   }
-  res.json(result.rows);
 });
 
 app.post('/sql/therapie', async (req, res) => {

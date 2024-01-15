@@ -5,6 +5,7 @@ const registerLink = document.querySelector('.register-link a');
 const loginLink = document.querySelector('.login-link a');
 const loginButton = document.querySelector('form-box.login form button');
 const loginForm = document.querySelector('.form-box.login form');
+const registerForm = document.querySelector('.form-box.register form');
 const homepageTabs = document.querySelectorAll('.home-page header .tablink');
 const signOutButtons = document.querySelectorAll('.sign-out-button');
 const homepageContents = document.querySelectorAll('.home-page .content-box .content');
@@ -62,11 +63,64 @@ homepageTabs.forEach((tab, index) => {
     })
 });
 
-loginForm.addEventListener('submit', (e) => {
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    showSinglePage('home-page');
-    setupHomePage();
+
+    const benutzername = loginForm.username.value;
+    const passwort = loginForm.password.value;
+
+    //console.log(loginForm.username.value, loginForm.password.value)
+    const result = await executeSqlCommand(`
+
+        SELECT * 
+        FROM BENUTZER
+        WHERE BENUTZERNAME = '${benutzername}'
+        AND PASSWORT = '${passwort}'
+
+    `);
+
+    console.log(result);
+
+    if (result.length > 0 ) {
+        document.getElementById('login-error').classList.add('hidden');
+        showSinglePage('home-page');
+        setupHomePage();
+    } else {
+        document.getElementById('login-error').classList.remove('hidden');
+    }
+
 });
+
+registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    var benutzername = registerForm.username.value;
+    var passwort = registerForm.password.value;
+
+    
+    const result = await executeSqlCommand(`
+        BEGIN
+        INSERT INTO BENUTZER (BENUTZERNAME, PASSWORT)
+        VALUES ('${benutzername}', '${passwort}');
+        COMMIT;
+        END;
+    `);
+
+    console.log(result);
+    if(result != null){
+        document.getElementById('register-error').classList.add('hidden');
+        console.log('test');
+        loginLink.click();
+    }else{
+        document.getElementById('register-error').classList.remove('hidden');
+    }
+
+    
+
+
+});
+
+
 
 registerLink.onclick = () => {
     wrapper.classList.add('active');
@@ -245,8 +299,8 @@ patientCreateTableForm.addEventListener('submit', async(e) => {
         SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
         SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
         CASE
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
             WHEN GESCHLECHT = 0 THEN 'Männlich'
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
             WHEN GESCHLECHT = 2 THEN 'Divers'
             ELSE 'Unbekannt'
         END AS GESCHLECHT,
@@ -454,17 +508,6 @@ addTherapieForm.addEventListener('submit', async (e) => {
 });
 
 
-// -- Ausgabe der Behandlungs-ID aus der temporären Tabelle
-// SELECT * FROM temp_behandlungs_id;
-
-// -- Temporäre Tabelle leeren
-// DELETE FROM temp_behandlungs_id;
-
-// -- Commit, um die Transaktion abzuschließen
-// COMMIT;
-
-// -- Temporäre Tabelle löschen (optional, wenn "ON COMMIT DELETE ROWS" verwendet wird)
-// -- DROP TABLE temp_behandlungs_id;
 
 function calculateAge(birthday) { // birthday is a date
     var ageDifMs = Date.now() - new Date(birthday).getTime();
