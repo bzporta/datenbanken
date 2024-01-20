@@ -14,8 +14,8 @@ let currentTab = 0;
 var patientId;
 
 function init() {
-    showSinglePage('login-page');
-    //showSinglePage('home-page');
+    // showSinglePage('login-page');
+    showSinglePage('home-page');
     setupHomePage();
 }
 
@@ -272,20 +272,84 @@ function logSqlCommand(sql_command) {
                  ${border}`);
 }
 
-// Treatment
+// // Treatment
 
-treatmentTabButtonTherapie = document.getElementById('therapie-tab-button2');
-treatmentTabButtonOperation = document.getElementById('operation-tab-button');
-treatmentTabButtonTherapie.addEventListener('click', (e) => {
-    e.preventDefault();
-    showElementById('therapietab');
-    hideElementById('operationstab');
+// treatmentTabButtonTherapie = document.getElementById('therapie-tab-button2');
+// treatmentTabButtonOperation = document.getElementById('operation-tab-button');
+// treatmentTabButtonTherapie.addEventListener('click', (e) => {
+//     e.preventDefault();
+//     showElementById('therapietab');
+//     hideElementById('operationstab');
+// });
+
+// treatmentTabButtonOperation.addEventListener('click', (e) => {
+//     e.preventDefault();
+//     showElementById('operationstab');
+//     hideElementById('therapietab');
+// });
+
+// Stations
+
+stationCreateTableButton = document.querySelector('#stationstab .wrapper .createTableButton');
+stationCreateTableButton.addEventListener('click', async() => {
+    var result = await executeSqlCommand(
+        `SELECT * FROM "MIPM"."STATION"`
+    )
+    constructTable(result, 'stations-table');
 });
 
-treatmentTabButtonOperation.addEventListener('click', (e) => {
+// Show Rooms in a Station
+showStationForm = document.getElementById('stationsauswahlform');
+showStationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    showElementById('operationstab');
-    hideElementById('therapietab');
+    var result = await executeSqlCommand(
+        `SELECT *
+        FROM "MIPM". ${showStationForm.raumartauswahl.value}
+        WHERE STATIONS_ID = ${showStationForm.chooseStationId.value}
+        `
+    )
+    constructTable(result, 'stationsraeume-table');
+});
+
+// Show Roomsdetails (kalender)
+showRoomDetailsForm = document.getElementById('raumauswahlform');
+showRoomDetailsForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+
+    const kalenderraumartauswahlValue = showRoomDetailsForm.kalenderraumartauswahl.value;
+
+    // if (kalenderraumartauswahlValue === "OPERATIONSSAAL") {
+    //     result = await executeSqlCommand(
+    //         `
+    //         SELECT * 
+    //         FROM "MIPM"."OPERATION"
+    //         WHERE OPERATIONSSAAL_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
+    //         `
+    //     );
+    // } else if (kalenderraumartauswahlValue === "LAGERRAUM") {
+        var result = await executeSqlCommand(
+            `
+            SELECT *
+            FROM "MIPM"."MEDIKAMENT"
+            WHERE LAGERRAUM_ID = 1
+            `
+        );
+    // } else {
+    //     // Handle other cases if needed
+    // }
+            
+    
+
+    // var result = await executeSqlCommand(
+    //     `
+    //     SELECT *
+    //     FROM "MIPM".${showRoomDetailsForm.kalenderraumartauswahl.value}
+    //     WHERE ${showRoomDetailsForm.kalenderauswahl.value} = ${showRoomDetailsForm.chooseRoomId.value}
+    //     `
+    // )
+    constructTable(result, 'raumKalender-table');
+
 });
 
 // Patients
@@ -323,26 +387,32 @@ patientCreateTableForm.addEventListener('submit', async(e) => {
 });
 
 async function setupPatientsTable() {
+    // var result = await executeSqlCommand(
+        // `
+        // CREATE VIEW meine_view AS
+        // SELECT PATIENT.PATIENTEN_ID, 
+        // K.NAME AS KRANKENHAUSNAME, 
+        // S.STATIONS_NAME || '-' || PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
+        // PATIENT.NAME, 
+        // SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        // SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        // CASE
+        //     WHEN GESCHLECHT = 1 THEN 'Weiblich'
+        //     WHEN GESCHLECHT = 0 THEN 'Männlich'
+        //     WHEN GESCHLECHT = 2 THEN 'Divers'
+        //     ELSE 'Unbekannt'
+        // END AS GESCHLECHT,
+        // SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+        // BLUTGRUPPE
+        // FROM "MIPM"."PATIENT"
+        // JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        // JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        // JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+        // `
+    // )
     var result = await executeSqlCommand(
-        `SELECT PATIENT.PATIENTEN_ID, 
-        K.NAME AS KRANKENHAUSNAME, 
-        S.STATIONS_NAME || '-' || PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
-        PATIENT.NAME, 
-        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
-        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
-        CASE
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN GESCHLECHT = 0 THEN 'Männlich'
-            WHEN GESCHLECHT = 2 THEN 'Divers'
-            ELSE 'Unbekannt'
-        END AS GESCHLECHT,
-        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
-        BLUTGRUPPE
-        FROM "MIPM"."PATIENT"
-        JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
-        JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
-        `
+        `SELECT * 
+        FROM SHOW_PATIENTS_TABLE_VIEW`
     )
     constructTable(result, 'patienten-table');
 }
@@ -442,6 +512,7 @@ showTreatmentForm.addEventListener('submit', async (e) => {
         WHERE BEHANDLUNGS_ID = ${showTreatmentForm.chooseBehandlungsId.value}`);
     
     constructTable(result, 'patientenBehandlung-table');
+    showElementByIdDisplay('patientenBehandlung-table', 'table');
 });
 
 // Add Patient Treatment
@@ -456,6 +527,8 @@ addTherapieForm.addEventListener('submit', async (e) => {
     // const krankenhaus_id = await executeSqlCommand(`SELECT KRANKENHAUS_ID FROM PATIENT WHERE PATIENTEN_ID = ${patientId}`);
 
     krankenhaus_id = 1;
+
+    hideElementById('addTreatmentPopup');
 
     // Ermitteln der genug qualifizierten Mitarbeiter
     const mitarberbeiternr = await executeSqlCommand(
@@ -568,29 +641,12 @@ GROUP BY
 
 async function createPatientDetailsTable() {
     var result = await executeSqlCommand(
-        `SELECT 
-        P.PATIENTEN_ID, 
-        P.NAME, 
-        K.NAME AS KRANKENHAUSNAME,  -- Hier wird der Name des Krankenhauses angezeigt
-        PR.RAUM_NR AS PATIENTENRAUM, 
-        SUBSTR(P.AUFNAHME_DATUM, 0, 8) AS AUFNAHMEDATUM, 
-        SUBSTR(P.ENTLASSUNGS_DATUM, 0, 8) AS ENTLASSUNGSDATUM, 
-        SUBSTR(P.GEBURTSDATUM, 0, 8) AS GEBURTSDATUM, 
-        CASE
-            WHEN P.GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN P.GESCHLECHT = 0 THEN 'Männlich'
-            WHEN P.GESCHLECHT = 2 THEN 'Divers'
-            ELSE 'Unbekannt'
-        END AS GESCHLECHT,
-        P.BLUTGRUPPE
-        FROM 
-            MIPM.PATIENT P
-        JOIN
-            MIPM.KRANKENHAUS K ON P.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        JOIN
-            MIPM.PATIENTENRAUM PR ON P.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        `
+        SELECT *
+        FROM SHOW_PATIENTS_TABLE_VIEW
         WHERE 
-            P.PATIENTEN_ID = ${patientId}`
+            PATIENTEN_ID = ${patientId}`
+
     )
 
     constructTable(result, 'patientenDetails-table');
@@ -602,13 +658,14 @@ patientDetailsCloseButton = document.querySelector('#patientenDetailsTab .wrappe
 patientDetailsCloseButton.addEventListener('click', () => {
     showElementByIdDisplay('patiententab', 'flex');
     hideElementById('patientenDetailsTab');
+    hideElementById('patientenBehandlung-table');
 });
 
 // Patientendiagnosesclose
-addDiagnosisPopupCloseButton = document.querySelector('#addDiagnosisPopup .closeButton');
-addDiagnosisPopupCloseButton.addEventListener('click', () => {
-    hideElementById('addDiagnosisPopup');
-});
+// addDiagnosisPopupCloseButton = document.querySelector('#addDiagnosisPopup .closeButton');
+// addDiagnosisPopupCloseButton.addEventListener('click', () => {
+//     hideElementById('addDiagnosisPopup');
+// });
 
 // PatientenaddDiagnoses
 addDiagnosisForm = document.getElementById('addDiagnosis-form');
@@ -651,10 +708,30 @@ openAddTreatmentButton.addEventListener('click', () => {
     showElementByIdDisplay('addTreatmentPopup', 'flex');
 });
 
+// Delete Treatment
+openDeleteTreatmentButton = document.getElementById('deleteTreatmentButton');
+openDeleteTreatmentButton.addEventListener('click', () => {
+    showElementByIdDisplay('deleteTreatmentPopup', 'flex');
+});
+
+// deleteTreatmentCloseButton = document.querySelector('#deleteTreatmentPopup .closeButton');
+// deleteTreatmentCloseButton.addEventListener('click', () => {
+//     hideElementById('deleteTreatmentPopup');
+// });
+
 // closeAddTreatmentButton = document.querySelector('#addTreatmentPopup .wrapper .closeButtonContainer .closeButton');
-closeAddTreatmentButton = document.getElementById('closeTreatmentPopup');
-closeAddTreatmentButton.addEventListener('click', () => {
-    hideElementById('addTreatmentPopup');
+// closeAddTreatmentButton = document.getElementById('closeTreatmentPopup');
+// closeAddTreatmentButton.addEventListener('click', () => {
+//     hideElementById('addTreatmentPopup');
+// });
+
+closePopupButtons = document.querySelectorAll('.closeButton');
+closePopupButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // var popup = this.parentElement.parentElement.parentElement;
+        var popup = button.closest('.popup')
+        if (popup) popup.style.display = 'none';
+    });
 });
 
 // Toggle Treatment

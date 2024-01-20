@@ -83,7 +83,6 @@
                     <button class="tablink">Patients</button>
                     <button class="tablink">Stations</button>
                     <button class="tablink">Personnel</button>
-                    <button class="tablink">Treatments</button>
                     <button class="sign-out-button">Sign out</button>
                 </div>
                 <div class="line"></div>
@@ -207,12 +206,36 @@
                                 <h2>Diagnosis</h2>
                                 <button class="btn">Add Diagnosis</button>
                                 <button class="btn">Refresh Diagnosis</button>
+                                <button class="btn" id="addTreatmentButton">Add Treatment</button>
+                                <button class="btn" id="deleteTreatmentButton">Delete Treatment</button>
                             </div>
                             <div class="table-container">
                                 <table id="patientenDiagnoses-table">
                                     <thead></thead>
                                     <tbody></tbody>
                                 </table>
+                            </div>
+
+                            <div class="popup" id="deleteTreatmentPopup">
+                                <div class="wrapper">
+                                    <h2>Delete Treatment</h2>
+                                    <div class="closeButtonContainer">
+                                        <button class="btn closeButton">Close</button>
+                                    </div>
+                                    <form action="" id="deleteTreatment-form">
+                                        <div class="form-box">
+                                            <select name="behandlundgstypauswahldelete" id="behandlungstypauswahldelete">
+                                                <option value="OPERATION">Operation</option>
+                                                <option value="THERAPIE">Therapie</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-box">
+                                            <label for="deleteTreatmentId">Treatment Id</label>
+                                            <input type="text" id="deleteTreatmentId" name="deleteTreatmentId" placeholder="Treatment Id" required>
+                                        </div>
+                                        <button type="submit" class="btn">Delete Treatment</button>
+                                    </form>
+                                </div>
                             </div>
 
                             <div class="popup" id="addDiagnosisPopup">
@@ -258,7 +281,6 @@
 
                             <div class="h2row">
                                 <h2>Details</h2>
-                                <button class="btn" id="addTreatmentButton">Add Treatment</button>
                                 <button class="btn" id="refreshTreatmentButton">Refresh Treatments</button>
                             </div>
                             <div class="table-container">
@@ -272,8 +294,8 @@
                                 <div class="wrapper">
                                     <h2>Treatments</h2>
                                     <div class="closeButtonContainer">
-                                        <button class="btn closeButton" id="closeTreatmentPopup">Close</button>
                                         <button class="btn closeButton" id="toggleAddTreatment">Operation</button>
+                                        <button class="btn closeButton" id="closeTreatmentPopup">Close</button>
                                     </div>
 
                                     <div id="addTherapieDiv">
@@ -352,10 +374,112 @@
                 
                 <!-- Stations -->
                 <div class="content">
-                    <div id="stationtab" class="content2">
-                        
-                    </div>
+                    <div id="stationstab" class="content2">
+                        <div class="wrapper">
+                            <h2>Stationen</h2>
+                            <form action="" id="station-form">
+                                <div class="form-box">
+                                    <label for="krankenhausid">Krankenhaus-id</label>
+                                    <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Krankenhaus-Id" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" name="name" placeholder="Name" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="vorname">Vorname</label>
+                                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="arbeitsbeginn">Arbeitsbeginn</label>
+                                    <input type="text" id="arbeitsbeginn" name="arbeitsbeginn" placeholder="Arbeitsbeginn" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="arbeitsende">Arbeitsende</label>
+                                    <input type="text" id="arbeitsende" name="arbeitsende" placeholder="Arbeitsende" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="fachrichtung">Fachrichtung</label>
+                                    <input type="text" id="fachrichtung" name="fachrichtung" placeholder="Fachrichtung" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="position">Position</label>
+                                    <input type="text" id="position" name="position" placeholder="Position" required>
+                                </div>
+                                
+                                <button type="submit" class="btn">Add Station</button>
+                            </form>
+                            <!-- Deleteform -->
+                            <form action="">
+                                <label for="stationsidDelete">Stations-Id</label>
+                                <input type="text" id="stationsidDelete" name="stationsidDelete" placeholder="Stations-Id" required>
+                                <button type="submit" class="btn">Delete Station</button>
+                            </form>
+                            <button id="createTableButton" class="btn createTableButton">CreateTable</button>
+                        </div>
+                            
+                        <div class="patienten-tableside">
+                            <div class="table-container">
+                                <table id="stations-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>      
+                            </div>
 
+                            <!-- Stationsauswahl -->
+                            <h2 class="h2second">Räume anzeigen</h2>
+                            <div class="wrapper behandlungsauswahl">
+                                <form action="" id="stationsauswahlform" class="auswahlform">
+                                    <div class="form-box2">
+                                        <label for="raumartauswahl">Raumart</label>
+                                        <select name="raumartauswahl" id="raumartauswahl">
+                                            <option value="PATIENTENRAUM">Patientenraum</option>
+                                            <option value="OPERATIONSSAAL">Operationssaal</option>
+                                            <option value="LAGERRAUM">Lagerraum</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-box2">
+                                        <label for="chooseStationId">Stations-Id</label>
+                                        <input type="text" id="chooseStationId" name="chooseStationId" placeholder="Station-Id" required>
+                                    </div>
+                                    <button type="submit" class="btn">Show Rooms</button>
+                                </form>
+                            </div>
+
+                            <div class="table-container">
+                                <table id="stationsraeume-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <!-- Raumauswahl -->
+                            <h2 class="h2second">Raumkalender</h2>
+                            <div class="wrapper behandlungsauswahl">
+                                <form action="" id="raumauswahlform">
+                                    <div class="form-box2">
+                                        <label for="kalenderraumartauswahl">Raumart</label>
+                                        <select name="kalenderraumartauswahl" id="kalenderraumartauswahl">
+                                            <option value="PATIENTENRAUM">Patientenraum</option>
+                                            <option value="OPERATIONSSAAL">Operationssaal</option>
+                                            <option value="LAGERRAUM">Lagerraum</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-box2">
+                                        <label for="kalenderchooseRaumId">Raum-Id</label>
+                                        <input type="text" id="kalenderchooseRaumId" name="kalenderchooseRaumId" placeholder="Raum-Id" required>
+                                    </div>
+                                    <button type="submit" class="btn">Show Details</button>
+                                </form>
+                            </div>
+                            <div class="table-container">
+                                <table id="raumKalender-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Personell -->
@@ -484,93 +608,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Treatments -->
-                <div class="content">
-                    <div id="therapietab">
-                        <div class="wrapper">
-                            <h2>Therapie</h2>
-                            <div>
-                                <input type="radio" id="therapie-tab-button" class="toggle-rad" name="therapie-tab-toggle" checked>
-                                <label for="therapie-tab-button" class="toggle-label">Therapien</label>
-                                
-                                <input type="radio" id="operation-tab-button" class="toggle-rad" name="operation-tab-toggle">
-                                <label for="operation-tab-button" class="toggle-label">Operations</label>
-                            </div>
-
-                            <form action="" id="treatments-form">
-                                <div class="form-box">
-                                    <label for="krankenhausid">Krankenhaus-id</label>
-                                    <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Diagnosis" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="name">Name</label>
-                                    <input type="text" id="name" name="name" placeholder="Name" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="vorname">Vorname</label>
-                                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="arbeitsbeginn">Arbeitsbegin</label>
-                                    <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
-                                </div>
-                                
-                                <button type="submit" class="btn">Add Personnel</button>
-                            </form>
-                            <button class="btn">CreateTable</button>
-                        </div>
-                        <div class="table-container">
-                            <table id="treatments-table">
-                                <thead></thead>
-                                <tbody></tbody>
-                            </table>      
-                        </div>
-                    </div>
-
-                    <div id="operationstab">
-                        <div class="wrapper">
-                            <h2>Operations</h2>
-                            <div>
-                                <input type="radio" id="therapie-tab-button2" class="toggle-rad" name="therapie-tab-toggle">
-                                <label for="therapie-tab-button2" class="toggle-label">Therapien</label>
-                                
-                                <input type="radio" id="operation-tab-button2" class="toggle-rad" name="operation-tab-toggle" checked>
-                                <label for="operation-tab-button" class="toggle-label">Operations</label>
-                            </div>
-
-                            <form action="" id="operations-form">
-                                <div class="form-box">
-                                    <label for="krankenhausid">Krankenhaus-id</label>
-                                    <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Diagnosis" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="name">Name</label>
-                                    <input type="text" id="name" name="name" placeholder="Name" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="vorname">Vorname</label>
-                                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="arbeitsbeginn">Arbeitsbegin</label>
-                                    <input type="text" id="arbeitsbegin" name="arbeitsbegin" placeholder="Arbeitsbegin" required>
-                                </div>
-                                
-                                <button type="submit" class="btn">Add Personnel</button>
-                            </form>
-                            <button class="btn">CreateTable</button>
-                        </div>
-                        <div class="table-container">
-                            <table id="treatments-table">
-                                <thead></thead>
-                                <tbody></tbody>
-                            </table>      
-                        </div>
-                    </div>
-
-                </div>
-                
             </div>
         </div>
     </div>

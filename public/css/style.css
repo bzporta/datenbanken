@@ -125,12 +125,30 @@ body {
   width: fit-content;
 }
 
+.h2row .btn {
+  margin-right: 15px;
+}
+
+.closeButtonContainer .btn {
+  margin-right: 15px;
+}
+
 #patientenauswahlform {
   display: flex;
   align-items: center;
 }
 
 #behandlungsauswahlform {
+  display: flex;
+  align-items: center;
+}
+
+#raumauswahlform {
+  display: flex;
+  align-items: center;
+}
+
+.auswahlform {
   display: flex;
   align-items: center;
 }
@@ -155,6 +173,10 @@ body {
 }
 
 #patientenDetailsTab h2 {
+  margin: 30px;
+}
+
+.h2second {
   margin: 30px;
 }
 
