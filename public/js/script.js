@@ -246,6 +246,7 @@ personnelForm.addEventListener('submit', (e) => {
 
 
 // Patient
+// adds
 versicherungForm = document.getElementById('versicherung-form-add');
 versicherungForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -309,6 +310,25 @@ rechnungForm.addEventListener('submit', (e) => {
     rechnungForm.reset();
 });
 
+// deletes
+versicherungremove = document.getElementById('versicherung-form-remove');
+versicherungremove.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   DELETE FROM PATIENT_VERSICHERUNG
+                   WHERE PATIENTEN_ID = '${versicherungremove.patientenid.value}'
+                   AND BETRIEBSNUMMER = '${versicherungremove.betriebsnummer.value}';
+                   COMMIT;
+                   END;`;
+
+    console.log(query);
+    
+    executeSqlCommand(query);
+
+    versicherungremove.reset();
+});
+
 versicherungdelete = document.getElementById('versicherung-form-del');
 versicherungdelete.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -322,9 +342,96 @@ versicherungdelete.addEventListener('submit', (e) => {
     
     executeSqlCommand(query);
 
-    versicherungForm.reset();
+    versicherungdelete.reset();
 });
 
+rechnungdelete = document.getElementById('rechnung-form-del');
+rechnungdelete.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   DELETE FROM RECHNUNG WHERE RECHNUNGS_NR = '${rechnungdelete.rechnungsnr.value}';
+                   COMMIT;
+                   END;`;
+
+    console.log(query);
+    
+    executeSqlCommand(query);
+
+    rechnungdelete.reset();
+});
+
+// updates
+versicherungupdate = document.getElementById('versicherung-form-update');
+versicherungupdate.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   UPDATE VERSICHERUNG
+                   SET VERSICHERUNGSNAME = '${versicherungupdate.versicherungsname.value}'
+                   WHERE BETRIEBSNUMMER = '${versicherungupdate.betriebsnummer.value}';
+                   COMMIT;
+                   END;`;
+
+    console.log(query);
+    
+    executeSqlCommand(query);
+
+    versicherungupdate.reset();
+});
+
+rechnungupdate = document.getElementById('rechnung-form-update');
+rechnungupdate.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (rechnungupdate.patientenid.value == '' && rechnungupdate.betriebsnummer.value == '' && rechnungupdate.betrag.value == '' && rechnungupdate.zuzahlung.value == '' && rechnungupdate.ausstellungs_datum.value == '' && rechnungupdate.faelligkeits_datum.value == '' && rechnungupdate.status.value == '') return;
+
+    var query = `BEGIN UPDATE RECHNUNG SET`;
+
+    if (rechnungupdate.patientenid.value != '') {
+        query += ` PATIENTEN_ID = '${rechnungupdate.patientenid.value}'`;
+    }
+
+    if (rechnungupdate.betriebsnummer.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` BETRIEBSNUMMER = '${rechnungupdate.betriebsnummer.value}'`;
+    }
+
+    if (rechnungupdate.betrag.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` BETRAG = '${rechnungupdate.betrag.value}'`;
+    }
+
+    if (rechnungupdate.zuzahlung.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` ZUZAHLUNG = '${rechnungupdate.zuzahlung.value}'`;
+    }
+
+    if (rechnungupdate.ausstellungs_datum.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` AUSSTELLUNGS_DATUM = '${rechnungupdate.ausstellungs_datum.value}'`;
+    }
+
+    if (rechnungupdate.faelligkeits_datum.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` FAELLIGKEITS_DATUM = '${rechnungupdate.faelligkeits_datum.value}'`;
+    }
+
+    if (rechnungupdate.status.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` STATUS = '${rechnungupdate.status.value}'`;
+    }
+
+    query += ` WHERE RECHNUNGS_NR = '${rechnungupdate.rechnungsnr.value}'; COMMIT; END;`;
+
+    console.log(query);
+    
+    executeSqlCommand(query);
+
+    rechnungupdate.reset();
+});
+
+// selects
 versicherungCreateTable = document.getElementById('versicherung-form-read');
 versicherungCreateTable.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -484,16 +591,19 @@ patientCreateTableButton.addEventListener('click', async () => {
     constructTable(result, 'Rechnung-table');
 });
 
-executeSqlCommand(`ALTER TABLE VERSICHERUNG
+/*
+executeSqlCommand(`ALTER TABLE PATIENT_VERSICHERUNG
                    ADD CONSTRAINT FK_PATIENT_VERSICHERUNG
                    FOREIGN KEY (BETRIEBSNUMMER)
-                   REFERENCES PATIENT_VERSICHERUNG (BETRIEBSNUMMER)
+                   REFERENCES VERSICHERUNG (BETRIEBSNUMMER)
                    ON DELETE CASCADE`);
 
-executeSqlCommand(`ALTER TABLE VERSICHERUNG
-                   ADD CONSTRAINT FK_VERSICHERUNG_RECHNNG
+
+executeSqlCommand(`ALTER TABLE RECHNUNG
+                   ADD CONSTRAINT FK_VERSICHERUNG_RECHNUNG
                    FOREIGN KEY (BETRIEBSNUMMER)
-                   REFERENCES RECHNUNG (BETRIEBSNUMMER)
+                   REFERENCES VERSICHERUNG (BETRIEBSNUMMER)
                    ON DELETE CASCADE`);
+*/
 
 init();

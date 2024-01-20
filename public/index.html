@@ -115,6 +115,26 @@
                             <button type="submit" class="btn">Add Versicherung to Patient</button>
                         </form>
 
+                        <form action="" id="versicherung-form-remove">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Remove Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-update">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="neuer Versicherungsname" required>
+                            </div>
+                            <button type="submit" class="btn">Update Versicherung</button>
+                        </form>
+
                         <form action="" id="versicherung-form-read">
                             <div>
                                 <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
@@ -130,7 +150,7 @@
 
                         <form action="" id="versicherung-form-del">
                             <div>
-                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
                             </div>
                             <button type="submit" class="btn">Delete Versicherung</button>
                         </form>
@@ -157,6 +177,34 @@
                             <button type="submit" class="btn">Add Rechnung</button>
                         </form>
 
+                        <form action="" id="rechnung-form-update">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnungs_Nr" required>
+                            </div>
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag">
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung">
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="status" name="status" placeholder="Status">
+                            </div>
+                            <button type="submit" class="btn">Update Rechnung</button>
+                        </form>
+
                         <form action="" id="rechnung-form-read">
                             <div>
                                 <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnung_Nr">
@@ -180,6 +228,13 @@
                                 <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum">
                             </div>
                             <button type="submit" class="btn">Search Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-del">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnungsnr" required>
+                            </div>
+                            <button type="submit" class="btn">Delete Rechnung</button>
                         </form>
                     </div>
                     
