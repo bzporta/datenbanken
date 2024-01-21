@@ -700,8 +700,14 @@ addOperationForm = document.getElementById('addOperation-form');
 addOperationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const startzeit = addOperationForm.operationStartzeit.value;
-    console.log(startzeit);
+    let startzeit = addOperationForm.operationStartzeit.value;
+    startzeit = startzeit.split('T');
+    startzeit = startzeit[1].replace(':', ',');
+
+    let endzeit = addOperationForm.operationEndzeit.value;
+    endzeit = endzeit.split('T');
+    endzeit = endzeit[1].replace(':', ',');
+    
 
 
     const result = await executeSqlCommand(`
@@ -710,9 +716,9 @@ addOperationForm.addEventListener('submit', async (e) => {
     JOIN STATION S ON S.STATIONS_ID = OS.STATIONS_ID
     JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
     LEFT JOIN OPERATION OP ON OS.OPERATIONSSAAL_ID = OP.OPERATIONSSAAL_ID
-    WHERE OS.OEFFNUNGSZEIT <= 7
-        AND OS.SCHLIESSUNGSZEIT >= 19
-        AND P.PATIENTEN_ID = 79
+    WHERE OS.OEFFNUNGSZEIT <= ${startzeit}
+        AND OS.SCHLIESSUNGSZEIT >= ${endzeit}
+        AND P.PATIENTEN_ID = ${patientId}
         AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('2024-01-15 08:00:00', 'YYYY-MM-DD HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('2024-01-15 17:00:00', 'YYYY-MM-DD HH24:MI:SS')))
         AND os.personenkapazitaet >= 8
     `
@@ -722,11 +728,6 @@ addOperationForm.addEventListener('submit', async (e) => {
 
     console.log("Operationssaal: ", operationssaal_id);
 
-
-
-
-
-    
 
     // const response = await fetch('/sql/operation', {
     //     method: 'POST',
