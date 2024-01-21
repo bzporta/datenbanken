@@ -26,6 +26,7 @@ function setupHomePage() {
         button.click();
     });
     setupPatientsTable();
+    setupStationsTable();
     
     setupFirstTab();  
 }
@@ -290,12 +291,59 @@ function logSqlCommand(sql_command) {
 
 // Stations
 
-stationCreateTableButton = document.querySelector('#stationstab .wrapper .createTableButton');
-stationCreateTableButton.addEventListener('click', async() => {
+// Station Add Form
+stationAddForm = document.getElementById('add-station-form');
+stationAddForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const query = `BEGIN
+    INSERT INTO "MIPM"."STATION" (KRANKENHAUS_ID, STATIONS_NAME, NOTFALLSTATION) 
+    VALUES (
+            '${stationAddForm.stationKrankenhausId.value}',
+            '${stationAddForm.stationsName.value}',
+            '${stationAddForm.notfallstation.value}');
+            COMMIT;
+            END;`;              
+    executeSqlCommand(query);
+    setupStationsTable();
+    stationAddForm.reset();
+});
+
+
+// Stations Createtable form
+stationCreateTableForm = document.getElementById('createStationsTableForm');
+stationCreateTableForm.addEventListener('submit', async(e) => {
+    e.preventDefault();
+
     var result = await executeSqlCommand(
-        `SELECT * FROM "MIPM"."STATION"`
+        `SELECT 
+        K.NAME AS KRANKENHAUSNAME,
+        STATIONS_NAME,
+        STATIONS_ID,
+        CASE
+            WHEN NOTFALLSTATION = 1 THEN 'Ja'
+            WHEN NOTFALLSTATION = 0 THEN 'Nein'
+        END AS NOTFALLSTATION
+        FROM "MIPM"."STATION"
+        JOIN "MIPM"."KRANKENHAUS" K ON STATION.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        ORDER BY "MIPM"."STATION".${stationCreateTableForm.stationsOrderBy.value}`
     )
     constructTable(result, 'stations-table');
+});
+
+// Stations Delete form
+deleteStationForm = document.getElementById('stationsDeleteForm');
+deleteStationForm.addEventListener('submit', async(e) => {
+    e.preventDefault();
+
+    var result = await executeSqlCommand(
+        `BEGIN
+        DELETE FROM "MIPM"."STATION" WHERE STATIONS_ID = ${deleteStationForm.stationIdDelete.value};
+        COMMIT;
+        END;`
+    )
+    constructTable(result, 'stations-table');
+    deleteStationForm.reset();
 });
 
 // Show Rooms in a Station
@@ -319,25 +367,52 @@ showRoomDetailsForm.addEventListener('submit', async (e) => {
 
     const kalenderraumartauswahlValue = showRoomDetailsForm.kalenderraumartauswahl.value;
 
-    // if (kalenderraumartauswahlValue === "OPERATIONSSAAL") {
-    //     result = await executeSqlCommand(
-    //         `
-    //         SELECT * 
-    //         FROM "MIPM"."OPERATION"
-    //         WHERE OPERATIONSSAAL_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
-    //         `
-    //     );
-    // } else if (kalenderraumartauswahlValue === "LAGERRAUM") {
+    if (kalenderraumartauswahlValue === "OPERATIONSSAAL") {
+        result = await executeSqlCommand(
+            `
+            SELECT * 
+            FROM "MIPM"."OPERATION"
+            WHERE OPERATIONSSAAL_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
+            `
+        );
+    } 
+    else if (kalenderraumartauswahlValue === "LAGERRAUM") {
         var result = await executeSqlCommand(
             `
             SELECT *
             FROM "MIPM"."MEDIKAMENT"
-            WHERE LAGERRAUM_ID = 1
+            WHERE LAGERRAUM_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
             `
         );
-    // } else {
-    //     // Handle other cases if needed
-    // }
+    } 
+    else if (kalenderraumartauswahlValue === "PATIENTENRAUM") {
+        var result = await executeSqlCommand(
+        `
+        SELECT
+            TD.BEHANDLUNGS_ID,
+            TD.DIAGNOSE_ID,
+            T.BEZEICHNUNG,
+            T.INFO,
+            T.STARTZEITPUNKT,
+            T.ENDZEITPUNKT,
+            P.NAME,
+            PR.PATIENTENRAUM_ID
+        FROM
+            THERAPIE_DIAGNOSE TD
+        JOIN
+            THERAPIE T ON TD.BEHANDLUNGS_ID = T.BEHANDLUNGS_ID
+        JOIN
+            DIAGNOSE D ON TD.DIAGNOSE_ID = D.DIAGNOSE_ID
+        JOIN
+            PATIENT P ON D.PATIENTEN_ID = P.PATIENTEN_ID
+        JOIN
+            PATIENTENRAUM PR ON P.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        WHERE
+            PR.PATIENTENRAUM_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
+        `
+        );
+    }
+    
             
     
 
@@ -415,6 +490,24 @@ async function setupPatientsTable() {
         FROM SHOW_PATIENTS_TABLE_VIEW`
     )
     constructTable(result, 'patienten-table');
+}
+
+async function setupStationsTable() {
+    var result = await executeSqlCommand(
+        `SELECT 
+        K.NAME AS KRANKENHAUSNAME,
+        STATIONS_NAME,
+        STATIONS_ID,
+        CASE
+            WHEN NOTFALLSTATION = 1 THEN 'Ja'
+            WHEN NOTFALLSTATION = 0 THEN 'Nein'
+        END AS NOTFALLSTATION
+        FROM "MIPM"."STATION"
+        JOIN "MIPM"."KRANKENHAUS" K ON STATION.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        ORDER BY "MIPM"."STATION".${stationCreateTableForm.stationsOrderBy.value}`
+    )
+
+    constructTable(result, 'stations-table');
 }
 
 // patientCreateTableButton = document.querySelector('#patiententab .wrapper .createTableButton');
@@ -515,6 +608,22 @@ showTreatmentForm.addEventListener('submit', async (e) => {
     showElementByIdDisplay('patientenBehandlung-table', 'table');
 });
 
+// Delete Patient Treatment
+deleteTreatmentForm = document.getElementById('deleteTreatment-form');
+deleteTreatmentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const result = await executeSqlCommand(
+        `BEGIN
+        DELETE FROM "MIPM"."${deleteTreatmentForm.behandlungstypauswahldelete.value}" WHERE BEHANDLUNGS_ID = ${deleteTreatmentForm.deleteTreatmentId.value};
+        COMMIT;
+        END;`
+    );
+    constructTable(result, 'patientenBehandlung-table');
+    deleteTreatmentForm.reset();
+});
+
+
 // Add Patient Treatment
 
 // addTreatmentForm = document.getElementById('addTreatment-form');
@@ -587,7 +696,30 @@ addTherapieForm.addEventListener('submit', async (e) => {
 
 });
 
+addOperationForm = document.getElementById('addOperation-form');
+addOperationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
+   
+    console.log(addOperationForm.operationEndzeit.value);
+
+    const response = await fetch('/sql/operation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            operationssaal_id: ``,
+            bezeichnung: `${addOperationForm.operationBezeichnung.value}`,
+            info: `${addOperationForm.operationInfo.value} 00:00:00`,
+            endzeit: `${addOperationForm.operationEndzeit.value}`,
+            fachrichtung: `${addOperationForm.operationFachrichtung.value} 00:00:00`,
+            startzeit: `${addOperationForm.operationStartzeit.value}`,
+        }),
+    });
+});
+
+//YYYY-MM-DD HH24:MI:SS
 
 function calculateAge(birthday) { // birthday is a date
     var ageDifMs = Date.now() - new Date(birthday).getTime();
@@ -873,7 +1005,6 @@ personnelForm.addEventListener('submit', (e) => {
 
 
 
-// Stations
 
 
 init();

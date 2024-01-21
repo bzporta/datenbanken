@@ -292,9 +292,9 @@
 
                             <div class="popup" id="addTreatmentPopup">
                                 <div class="wrapper">
-                                    <h2>Treatments</h2>
+                                    <h2>Add Treatments</h2>
                                     <div class="closeButtonContainer">
-                                        <button class="btn closeButton" id="toggleAddTreatment">Operation</button>
+                                        <button class="btn" id="toggleAddTreatment">Operation</button>
                                         <button class="btn closeButton" id="closeTreatmentPopup">Close</button>
                                     </div>
 
@@ -346,16 +346,32 @@
                                         <h2>Operation</h2>
                                         <form action="" id="addOperation-form">
                                             <div class="form-box">
-                                                <label for="diagnosisMitarbeiterNr">Mitarbeiter Nummer</label>
-                                                <input type="text" id="diagnosisMitarbeiterNr" name="diagnosisMitarbeiterNr" placeholder="Mitarbeiter Nummer" required>
+                                                <label for="operationBezeichnung">Titel</label>
+                                                <textarea class="input-textarea" name="operationBezeichnung" id="operationBezeichnung" rows="1" required></textarea>
                                             </div>
                                             <div class="form-box">
-                                                <label for="diagnosisdate">Date</label>
-                                                <input type="date" id="diagnosisdate" name="diagnosesdate" required>
+                                                <label for="operationInfo">Beschreibung</label>
+                                                <textarea class="input-textarea" id="operationInfo" name="operationInfo" rows="5" required></textarea>
                                             </div>
                                             <div class="form-box">
-                                                <label for="diagnosisdescription">Description</label>
-                                                <textarea class="input-textarea" id="diagnosisdescription" name="diagnosisdescription" rows="5" required></textarea>
+                                                <label for="operationFachrichtung">Fachrichtung</label>
+                                                <select name="operationFachrichtung" id="operationFachrichtung" required>
+                                                    <option value="Neurologie">Neurologie</option>
+                                                    <option value="Allgemeinmedizin">Allgemeinmedizin</option>
+                                                    <option value="Dermatologie">Dermatologie</option>
+                                                    <option value="Gynäkologie">Gynäkologie</option>
+                                                    <option value="Orthopädie">Orthopädie</option>
+                                                    <option value="Pädiatrie">Pädiatrie</option>
+                                                    <option value="Chirurgie">Chirurgie</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="operationStartzeit">Startzeit</label>
+                                                <input type="datetime-local" id="operationStartzeit" name="operationStartzeit" value="2024-02-15T19:30" required></textarea>
+                                            </div>
+                                            <div class="form-box">
+                                                <label for="operationEndzeit">Endzeit</label>
+                                                <input type="datetime-local" id="operationEndzeit" name="operationEndzeit" value="2024-02-15T20:00" required></textarea>
                                             </div>
                                             <button type="submit" class="btn">Add Treatment</button>
                                         </form>
@@ -377,45 +393,42 @@
                     <div id="stationstab" class="content2">
                         <div class="wrapper">
                             <h2>Stationen</h2>
-                            <form action="" id="station-form">
+                            <form action="" id="add-station-form">
                                 <div class="form-box">
-                                    <label for="krankenhausid">Krankenhaus-id</label>
-                                    <input type="text" id="krankenhausid" name="krankenhausid" placeholder="Krankenhaus-Id" required>
+                                    <label for="stationsName">Stations-Name</label>
+                                    <input type="text" id="stationsName" name="stationsName" placeholder="Stations-Name" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="name">Name</label>
-                                    <input type="text" id="name" name="name" placeholder="Name" required>
+                                    <label for="stationKrankenhausId">Krankenhaus-Id</label>
+                                    <input type="text" id="stationKrankenhausId" name="stationKrankenhausId" placeholder="StationKrankenhausId" required>
                                 </div>
                                 <div class="form-box">
-                                    <label for="vorname">Vorname</label>
-                                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required>
+                                    <label for="notfallstation">Notfallstation</label>
+                                    <select name="notfallstation" id="notfallstation">
+                                        <option value="0">Nein</option>
+                                        <option value="1">Ja</option>
+                                    </select>
                                 </div>
-                                <div class="form-box">
-                                    <label for="arbeitsbeginn">Arbeitsbeginn</label>
-                                    <input type="text" id="arbeitsbeginn" name="arbeitsbeginn" placeholder="Arbeitsbeginn" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="arbeitsende">Arbeitsende</label>
-                                    <input type="text" id="arbeitsende" name="arbeitsende" placeholder="Arbeitsende" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="fachrichtung">Fachrichtung</label>
-                                    <input type="text" id="fachrichtung" name="fachrichtung" placeholder="Fachrichtung" required>
-                                </div>
-                                <div class="form-box">
-                                    <label for="position">Position</label>
-                                    <input type="text" id="position" name="position" placeholder="Position" required>
-                                </div>
-                                
                                 <button type="submit" class="btn">Add Station</button>
                             </form>
                             <!-- Deleteform -->
-                            <form action="">
-                                <label for="stationsidDelete">Stations-Id</label>
-                                <input type="text" id="stationsidDelete" name="stationsidDelete" placeholder="Stations-Id" required>
+                            <form action="" id="stationsDeleteForm">
+                                <label for="stationIdDelete">Stations-Id</label>
+                                <input type="text" id="stationIdDelete" name="stationIdDelete" placeholder="Stations-Id" required>
                                 <button type="submit" class="btn">Delete Station</button>
                             </form>
-                            <button id="createTableButton" class="btn createTableButton">CreateTable</button>
+                            <!-- CreateTableForm -->
+                            <form action="" class="createTabForm" id="createStationsTableForm">
+                                <label for="stationsOrderBy">Sortiert nach</label>
+                                <select name="stationsOrderBy" id="stationsOrderBy">
+                                    <option value="KRANKENHAUS_ID">Krankenhaus-Id</option>
+                                    <option value="NOTFALLSTATION">Notfallstation</option>
+                                    <option value="STATIONS_ID">Stations-id</option>
+                                    <option value="STATIONS_NAME">Stations-Name</option>
+                                </select>
+                                <button type="submit" class="btn">CreateTable</button>
+                            </form>
+                            <!-- <button id="createTableButton" class="btn createTableButton">CreateTable</button> -->
                         </div>
                             
                         <div class="patienten-tableside">
@@ -454,7 +467,7 @@
                             </div>
 
                             <!-- Raumauswahl -->
-                            <h2 class="h2second">Raumkalender</h2>
+                            <h2 class="h2second">Raumdetails</h2>
                             <div class="wrapper behandlungsauswahl">
                                 <form action="" id="raumauswahlform">
                                     <div class="form-box2">

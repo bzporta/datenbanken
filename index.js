@@ -131,6 +131,42 @@ app.post('/sql/therapie', async (req, res) => {
   }
 });
 
+app.post('/sql/operation', async (req, res) => {
+  try {
+
+      const connection =  await oracledb.getConnection({
+        user: 'mipm',
+        password: 'orcPW2023',
+        connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
+      });
+  
+
+      const sql = `INSERT INTO OPERATION (operationssaal_id, bezeichnung, info, endzeit, fachrichtung, startzeit) 
+                   VALUES (:bezeichnung, :info, TO_DATE(:startzeitpunkt, 'YYYY-MM-DD HH24:MI:SS'), :berechtigungsstufe, TO_DATE(:endzeitpunkt, 'YYYY-MM-DD HH24:MI:SS')) 
+                   RETURNING behandlungs_id INTO :behandlungsId`;
+
+      const bindParams = {
+          operationssaal_id: req.body.operationssaal_id,
+          bezeichnung: req.body.bezeichnung,
+          info: req.body.info,
+          berechtigungsstufe: req.body.berechtigungsstufe,
+          endzeitpunkt: req.body.endzeitpunkt,
+          behandlungsId: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      };
+
+      console.log(sql, bindParams);
+      const result = await connection.execute(sql, bindParams, { autoCommit: true });
+
+
+      await connection.close();
+
+      res.json({ behandlungsId: result.outBinds.behandlungsId[0] });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
 
 app.get('/api/arzt', async (req, res) => {
     try {
