@@ -393,8 +393,8 @@ showRoomDetailsForm.addEventListener('submit', async (e) => {
             TD.DIAGNOSE_ID,
             T.BEZEICHNUNG,
             T.INFO,
-            T.STARTZEITPUNKT,
-            T.ENDZEITPUNKT,
+            SUBSTR(T.STARTZEITPUNKT ,0,8) AS STARTZEITPUNKT,
+            SUBSTR(T.ENDZEITPUNKT, 0, 8) AS ENDZEITPUNKT,
             P.NAME,
             PR.PATIENTENRAUM_ID
         FROM
@@ -700,23 +700,53 @@ addOperationForm = document.getElementById('addOperation-form');
 addOperationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-   
-    console.log(addOperationForm.operationEndzeit.value);
+    const startzeit = addOperationForm.operationStartzeit.value;
+    console.log(startzeit);
 
-    const response = await fetch('/sql/operation', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            operationssaal_id: ``,
-            bezeichnung: `${addOperationForm.operationBezeichnung.value}`,
-            info: `${addOperationForm.operationInfo.value} 00:00:00`,
-            endzeit: `${addOperationForm.operationEndzeit.value}`,
-            fachrichtung: `${addOperationForm.operationFachrichtung.value} 00:00:00`,
-            startzeit: `${addOperationForm.operationStartzeit.value}`,
-        }),
-    });
+
+    const result = await executeSqlCommand(`
+    SELECT OS.OPERATIONSSAAL_ID
+    FROM OPERATIONSSAAL OS
+    JOIN STATION S ON S.STATIONS_ID = OS.STATIONS_ID
+    JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+    LEFT JOIN OPERATION OP ON OS.OPERATIONSSAAL_ID = OP.OPERATIONSSAAL_ID
+    WHERE OS.OEFFNUNGSZEIT <= 7
+        AND OS.SCHLIESSUNGSZEIT >= 19
+        AND P.PATIENTEN_ID = 79
+        AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('2024-01-15 08:00:00', 'YYYY-MM-DD HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('2024-01-15 17:00:00', 'YYYY-MM-DD HH24:MI:SS')))
+        AND os.personenkapazitaet >= 8
+    `
+    );
+
+    const operationssaal_id = result[0].OPERATIONSSAAL_ID;
+
+    console.log("Operationssaal: ", operationssaal_id);
+
+
+
+
+
+    
+
+    // const response = await fetch('/sql/operation', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({
+    //         operationssaal_id: ``,
+    //         bezeichnung: `${addOperationForm.operationBezeichnung.value}`,
+    //         info: `${addOperationForm.operationInfo.value}`,
+    //         endzeit: `${addOperationForm.operationEndzeit.value}`,
+    //         fachrichtung: `${addOperationForm.operationFachrichtung.value}`,
+    //         startzeit: `${addOperationForm.operationStartzeit.value}`,
+    //     }),
+    // });
+
+    // var behandlungs_id = await response.json();
+
+    // behandlungs_id = behandlungs_id.behandlungsId;
+
 });
 
 //YYYY-MM-DD HH24:MI:SS
@@ -1003,8 +1033,477 @@ personnelForm.addEventListener('submit', (e) => {
     deleteArztForm.reset();
 });
 
+/*
+// Versicherung und Rechnung
+// adds
+versicherungForm = document.getElementById('versicherung-form-add');
+versicherungForm.addEventListener('submit', (e) => {
+    e.preventDefault();
 
+    const query = `BEGIN
+                   INSERT INTO "MIPM"."VERSICHERUNG" (BETRIEBSNUMMER, VERSICHERUNGSNAME)
+                   VALUES (
+                   '${versicherungForm.betriebsnummer.value}',
+                   '${versicherungForm.versicherungsname.value}');
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
 
+    versicherungForm.reset();
+});
 
+patientversicherungForm = document.getElementById('versicherung-form-add-patient');
+patientversicherungForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   INSERT INTO "MIPM"."PATIENT_VERSICHERUNG" (PATIENTEN_ID, BETRIEBSNUMMER, VERSICHERUNGSNUMMER)
+                   VALUES (
+                   '${patientversicherungForm.patientenid.value}',
+                   '${patientversicherungForm.betriebsnummer.value}',
+                   '${patientversicherungForm.versicherungsnummer.value}');
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
+
+    patientversicherungForm.reset();
+});
+
+rechnungForm = document.getElementById('rechnung-form-add');
+rechnungForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   INSERT INTO "MIPM"."RECHNUNG" (PATIENTEN_ID, BETRIEBSNUMMER, BETRAG, ZUZAHLUNG, AUSSTELLUNGS_DATUM, FAELLIGKEITS_DATUM, STATUS)
+                   VALUES (
+                   '${rechnungForm.patientenid.value}',
+                   '${rechnungForm.betriebsnummer.value}',
+                   '${rechnungForm.betrag.value}',
+                   '${rechnungForm.zuzahlung.value}',
+                   '${rechnungForm.ausstellungs_datum.value}',
+                   '${rechnungForm.faelligkeits_datum.value}',
+                   1);
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
+
+    rechnungForm.reset();
+});
+
+// deletes
+versicherungremove = document.getElementById('versicherung-form-remove');
+versicherungremove.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   DELETE FROM PATIENT_VERSICHERUNG
+                   WHERE PATIENTEN_ID = '${versicherungremove.patientenid.value}'
+                   AND BETRIEBSNUMMER = '${versicherungremove.betriebsnummer.value}';
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
+
+    versicherungremove.reset();
+});
+
+versicherungdelete = document.getElementById('versicherung-form-del');
+versicherungdelete.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   DELETE FROM VERSICHERUNG WHERE BETRIEBSNUMMER = '${versicherungdelete.betriebsnummer.value}';
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
+
+    versicherungdelete.reset();
+});
+
+rechnungdelete = document.getElementById('rechnung-form-del');
+rechnungdelete.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   DELETE FROM RECHNUNG WHERE RECHNUNGS_NR = '${rechnungdelete.rechnungsnr.value}';
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
+
+    rechnungdelete.reset();
+});
+
+// updates
+versicherungupdate = document.getElementById('versicherung-form-update');
+versicherungupdate.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const query = `BEGIN
+                   UPDATE VERSICHERUNG
+                   SET VERSICHERUNGSNAME = '${versicherungupdate.versicherungsname.value}'
+                   WHERE BETRIEBSNUMMER = '${versicherungupdate.betriebsnummer.value}';
+                   COMMIT;
+                   END;`;
+    
+    executeSqlCommand(query);
+
+    versicherungupdate.reset();
+});
+
+rechnungupdate = document.getElementById('rechnung-form-update');
+rechnungupdate.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (rechnungupdate.patientenid.value == '' && rechnungupdate.betriebsnummer.value == '' && rechnungupdate.betrag.value == '' && rechnungupdate.zuzahlung.value == '' && rechnungupdate.ausstellungs_datum.value == '' && rechnungupdate.faelligkeits_datum.value == '' && rechnungupdate.status.value == '') return;
+
+    var query = `BEGIN UPDATE RECHNUNG SET`;
+
+    if (rechnungupdate.patientenid.value != '') {
+        query += ` PATIENTEN_ID = '${rechnungupdate.patientenid.value}'`;
+    }
+
+    if (rechnungupdate.betriebsnummer.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` BETRIEBSNUMMER = '${rechnungupdate.betriebsnummer.value}'`;
+    }
+
+    if (rechnungupdate.betrag.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` BETRAG = '${rechnungupdate.betrag.value}'`;
+    }
+
+    if (rechnungupdate.zuzahlung.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` ZUZAHLUNG = '${rechnungupdate.zuzahlung.value}'`;
+    }
+
+    if (rechnungupdate.ausstellungs_datum.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` AUSSTELLUNGS_DATUM = '${rechnungupdate.ausstellungs_datum.value}'`;
+    }
+
+    if (rechnungupdate.faelligkeits_datum.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` FAELLIGKEITS_DATUM = '${rechnungupdate.faelligkeits_datum.value}'`;
+    }
+
+    if (rechnungupdate.status.value != '') {
+        if (query != `BEGIN UPDATE RECHNUNG SET`) query += `, `;
+        query += ` STATUS = '${rechnungupdate.status.value}'`;
+    }
+
+    query += ` WHERE RECHNUNGS_NR = '${rechnungupdate.rechnungsnr.value}'; COMMIT; END;`;
+    
+    executeSqlCommand(query);
+
+    rechnungupdate.reset();
+});
+
+// selects
+versicherungCreateTable = document.getElementById('versicherung-form-read');
+versicherungCreateTable.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    var result;
+    var query = `SELECT * FROM VERSICHERUNG`;
+
+    if (versicherungCreateTable.patientenid.value != '' || versicherungCreateTable.betriebsnummer.value != '' || versicherungCreateTable.versicherungsname.value != '') {
+        if (versicherungCreateTable.patientenid.value != '') {
+            query = `SELECT PATIENT_VERSICHERUNG.PATIENTEN_ID, PATIENT_VERSICHERUNG.BETRIEBSNUMMER, PATIENT_VERSICHERUNG.VERSICHERUNGSNUMMER FROM VERSICHERUNG INNER JOIN PATIENT_VERSICHERUNG ON VERSICHERUNG.BETRIEBSNUMMER = PATIENT_VERSICHERUNG.BETRIEBSNUMMER`;
+        }
+
+        query += ` WHERE`;
+    }
+
+    if (versicherungCreateTable.patientenid.value != '') {
+        query += ` PATIENT_VERSICHERUNG.PATIENTEN_ID = '${versicherungCreateTable.patientenid.value}'`;
+    }
+
+    if (versicherungCreateTable.betriebsnummer.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+
+        query += ` VERSICHERUNG.BETRIEBSNUMMER = '${versicherungCreateTable.betriebsnummer.value}'`;
+    }
+    
+    if (versicherungCreateTable.versicherungsname.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+
+        query += ` VERSICHERUNG.VERSICHERUNGSNAME LIKE '${versicherungCreateTable.versicherungsname.value}'`
+    }
+
+    query += ` ORDER BY VERSICHERUNG.BETRIEBSNUMMER ASC`
+
+    result = await executeSqlCommand(query);
+
+    constructTable(result, 'Versicherung-table');
+});
+
+rechnungCreateTable = document.getElementById('rechnung-form-read');
+rechnungCreateTable.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    var result;
+    var query = `SELECT RECHNUNGS_NR, PATIENTEN_ID, BETRIEBSNUMMER, BETRAG, ZUZAHLUNG, SUBSTR(AUSSTELLUNGS_DATUM ,0,8) AS AUSSTELLUNGSDATUM, SUBSTR(FAELLIGKEITS_DATUM ,0,8) AS FÄLLIGKEITSDATUM, STATUS FROM RECHNUNG`;
+
+    if (rechnungCreateTable.rechnungsnr.value != '' || rechnungCreateTable.patientenid.value != '' || rechnungCreateTable.betriebsnummer.value != '' || rechnungCreateTable.betrag.value != '' || rechnungCreateTable.zuzahlung.value != '' || rechnungCreateTable.ausstellungs_datum.value != '' || rechnungCreateTable.faelligkeits_datum.value != '') {
+        query += ` WHERE`;
+    }
+
+    if (rechnungCreateTable.rechnungsnr.value != '') {
+        if (rechnungCreateTable.rechnungsnr.value.includes('sum')) {
+            query = ` SELECT PATIENTEN_ID, SUM(BETRAG) + SUM(ZUZAHLUNG) AS GESAMTBETRAG FROM RECHNUNG`;
+            if (rechnungCreateTable.patientenid.value != '' || rechnungCreateTable.betriebsnummer.value != '' || rechnungCreateTable.betrag.value != '' || rechnungCreateTable.zuzahlung.value != '') {
+                query += ` WHERE`;
+            }
+        } else if (rechnungCreateTable.rechnungsnr.value.includes('-')) {
+            query += ` RECHNUNGS_NR BETWEEN '${rechnungCreateTable.rechnungsnr.value.substring(0, rechnungCreateTable.rechnungsnr.value.indexOf('-'))}' AND '${rechnungCreateTable.rechnungsnr.value.substring(rechnungCreateTable.rechnungsnr.value.indexOf('-') + 1)}'`;
+        } else {
+            query += ` RECHNUNGS_NR = '${rechnungCreateTable.rechnungsnr.value}'`;
+        }
+    }
+
+    if (rechnungCreateTable.patientenid.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+
+        if (rechnungCreateTable.patientenid.value.includes('-')) {
+            query += ` PATIENTEN_ID BETWEEN '${rechnungCreateTable.patientenid.value.substring(0, rechnungCreateTable.patientenid.value.indexOf('-'))}' AND '${rechnungCreateTable.patientenid.value.substring(rechnungCreateTable.patientenid.value.indexOf('-') + 1)}'`;
+        } else {
+            query += ` PATIENTEN_ID = '${rechnungCreateTable.patientenid.value}'`;
+        }
+    }
+
+    if (rechnungCreateTable.betriebsnummer.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+
+        if (rechnungCreateTable.betriebsnummer.value.includes('-')) {
+            query += ` BETRIEBSNUMMER BETWEEN '${rechnungCreateTable.betriebsnummer.value.substring(0, rechnungCreateTable.betriebsnummer.value.indexOf('-'))}' AND '${rechnungCreateTable.betriebsnummer.value.substring(rechnungCreateTable.betriebsnummer.value.indexOf('-') + 1)}'`;
+        } else {
+            query += ` BETRIEBSNUMMER = '${rechnungCreateTable.betriebsnummer.value}'`;
+        }
+    }
+
+    if (rechnungCreateTable.betrag.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+
+        if (rechnungCreateTable.betrag.value.includes('-', 1)) {
+            query += ` BETRAG BETWEEN '${rechnungCreateTable.betrag.value.substring(0, rechnungCreateTable.betrag.value.indexOf('-'))}' AND '${rechnungCreateTable.betrag.value.substring(rechnungCreateTable.betrag.value.indexOf('-') + 1)}'`;
+        } else {
+            query += ` BETRAG = '${rechnungCreateTable.betrag.value}'`;
+        }
+    }
+
+    if (rechnungCreateTable.zuzahlung.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+        
+        if (rechnungCreateTable.zuzahlung.value.includes('-', 1)) {
+            query += ` ZUZAHLUNG BETWEEN '${rechnungCreateTable.zuzahlung.value.substring(0, rechnungCreateTable.zuzahlung.value.indexOf('-'))}' AND '${rechnungCreateTable.zuzahlung.value.substring(rechnungCreateTable.zuzahlung.value.indexOf('-') + 1)}'`;
+        } else {
+            query += ` ZUZAHLUNG = '${rechnungCreateTable.zuzahlung.value}'`;
+        }
+    }
+
+    if (rechnungCreateTable.ausstellungs_datum.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+        
+        if (rechnungCreateTable.ausstellungs_datum.value.includes('-')) {
+            query += ` TRUNC(AUSSTELLUNGS_DATUM) BETWEEN TO_DATE('${rechnungCreateTable.ausstellungs_datum.value.substring(0, rechnungCreateTable.ausstellungs_datum.value.indexOf('-'))}','DD-MM-YYYY') AND TO_DATE('${rechnungCreateTable.ausstellungs_datum.value.substring(rechnungCreateTable.ausstellungs_datum.value.indexOf('-') + 1)}','DD-MM-YYYY')`;
+        } else {
+            query += ` TRUNC(AUSSTELLUNGS_DATUM) = to_date('${rechnungCreateTable.ausstellungs_datum.value}','DD-MM-YYYY')`;
+        }
+    }
+
+    if (rechnungCreateTable.faelligkeits_datum.value != '') {
+        if (query.substring(query.length - 5) != 'WHERE') query += ' AND';
+        
+        if (rechnungCreateTable.faelligkeits_datum.value.includes('fällig')) {
+            query += ` TRUNC(FAELLIGKEITS_DATUM) < TRUNC(SYSDATE) AND STATUS = 1`;
+        } else if (rechnungCreateTable.faelligkeits_datum.value.includes('-')) {
+            query += ` TRUNC(FAELLIGKEITS_DATUM) BETWEEN TO_DATE('${rechnungCreateTable.faelligkeits_datum.value.substring(0, rechnungCreateTable.faelligkeits_datum.value.indexOf('-'))}','DD-MM-YYYY') AND TO_DATE('${rechnungCreateTable.faelligkeits_datum.value.substring(rechnungCreateTable.faelligkeits_datum.value.indexOf('-') + 1)}','DD-MM-YYYY')`;
+        } else {
+            query += ` TRUNC(FAELLIGKEITS_DATUM) = TO_DATE('${rechnungCreateTable.faelligkeits_datum.value}','DD-MM-YYYY')`;
+        }
+    }
+
+    if (rechnungCreateTable.rechnungsnr.value.includes('sum')) {
+        query += ` GROUP BY PATIENTEN_ID`;
+    }
+
+    query += ` ORDER BY PATIENTEN_ID ASC`;
+
+    result = await executeSqlCommand(query);
+
+    constructTable(result, 'Rechnung-table');
+});
+
+*/
+
+/* HTML zu Versicherung und Rechnung
+
+                        <form action="" id="versicherung-form-add">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="Versicherungsname" required>
+                            </div>
+                            <button type="submit" class="btn">Add Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-add-patient">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsnummer" name="versicherungsnummer" placeholder="Versicherungsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Add Versicherung to Patient</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-remove">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Remove Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-update">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="neuer Versicherungsname" required>
+                            </div>
+                            <button type="submit" class="btn">Update Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-read">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="Versicherungsname">
+                            </div>
+                            <button type="submit" class="btn">Search Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-del">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Delete Versicherung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-add">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag" required>
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung" required>
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum" required>
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum" required>
+                            </div>
+                            <button type="submit" class="btn">Add Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-update">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnungs_Nr" required>
+                            </div>
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag">
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung">
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="status" name="status" placeholder="Status">
+                            </div>
+                            <button type="submit" class="btn">Update Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-read">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnung_Nr">
+                            </div>
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag">
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung">
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum">
+                            </div>
+                            <button type="submit" class="btn">Search Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-del">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnungsnr" required>
+                            </div>
+                            <button type="submit" class="btn">Delete Rechnung</button>
+                        </form>
+
+                        <table id="Patient-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <table id="Versicherung-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <table id="Rechnung-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+
+*/
 
 init();
