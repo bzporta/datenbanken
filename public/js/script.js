@@ -702,14 +702,14 @@ addOperationForm.addEventListener('submit', async (e) => {
 
     let startzeit = addOperationForm.operationStartzeit.value;
     startzeit = startzeit.split('T');
-    startzeit = startzeit[1].replace(':', ',');
+    startzeit = startzeit[1].replace(':', '.');
 
     let endzeit = addOperationForm.operationEndzeit.value;
     endzeit = endzeit.split('T');
-    endzeit = endzeit[1].replace(':', ',');
+    endzeit = endzeit[1].replace(':', '.');
     
 
-
+    // Ermittelt den Operationssaal, der zu einer bestimmten Zeitspanne frei ist, im richtigen Krankenhaus (des Patienten) liegt und genug Kapazität hat
     const result = await executeSqlCommand(`
     SELECT OS.OPERATIONSSAAL_ID
     FROM OPERATIONSSAAL OS
@@ -719,38 +719,43 @@ addOperationForm.addEventListener('submit', async (e) => {
     WHERE OS.OEFFNUNGSZEIT <= ${startzeit}
         AND OS.SCHLIESSUNGSZEIT >= ${endzeit}
         AND P.PATIENTEN_ID = ${patientId}
-        AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('2024-01-15 08:00:00', 'YYYY-MM-DD HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('2024-01-15 17:00:00', 'YYYY-MM-DD HH24:MI:SS')))
-        AND os.personenkapazitaet >= 8
+        AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD HH24:MI:SS')))
+        AND os.personenkapazitaet >= ${addOperationForm.operationPersonenanzahl.value}
     `
     );
-
+    
     const operationssaal_id = result[0].OPERATIONSSAAL_ID;
+    console.log(operationssaal_id);
 
-    console.log("Operationssaal: ", operationssaal_id);
 
+    const response = await fetch('/sql/operation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            operationssaal_id: operationssaal_id,
+            bezeichnung: `${addOperationForm.operationBezeichnung.value}`,
+            info: `${addOperationForm.operationInfo.value}`,
+            endzeit: `${addOperationForm.operationEndzeit.value}`,
+            fachrichtung: `${addOperationForm.operationFachrichtung.value}`,
+            startzeit: `${addOperationForm.operationStartzeit.value}`,
+        }),
+    });
 
-    // const response = await fetch('/sql/operation', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //         operationssaal_id: ``,
-    //         bezeichnung: `${addOperationForm.operationBezeichnung.value}`,
-    //         info: `${addOperationForm.operationInfo.value}`,
-    //         endzeit: `${addOperationForm.operationEndzeit.value}`,
-    //         fachrichtung: `${addOperationForm.operationFachrichtung.value}`,
-    //         startzeit: `${addOperationForm.operationStartzeit.value}`,
-    //     }),
-    // });
-
-    // var behandlungs_id = await response.json();
-
-    // behandlungs_id = behandlungs_id.behandlungsId;
-
+    var behandlungs_id = await response.json();
+    behandlungs_id = behandlungs_id.behandlungsId;
+    
+    await executeSqlCommand(
+    `
+    BEGIN
+    INSERT INTO "MIPM"."OPERATION_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID) VALUES (${behandlungs_id}, ${addOperationForm.operationDiagnoseId.value});
+    COMMIT;
+    END;
+    ` 
+    );
 });
 
-//YYYY-MM-DD HH24:MI:SS
 
 function calculateAge(birthday) { // birthday is a date
     var ageDifMs = Date.now() - new Date(birthday).getTime();

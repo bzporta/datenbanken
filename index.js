@@ -142,15 +142,16 @@ app.post('/sql/operation', async (req, res) => {
   
 
       const sql = `INSERT INTO OPERATION (operationssaal_id, bezeichnung, info, endzeit, fachrichtung, startzeit) 
-                   VALUES (:bezeichnung, :info, TO_DATE(:startzeitpunkt, 'YYYY-MM-DD HH24:MI:SS'), :berechtigungsstufe, TO_DATE(:endzeitpunkt, 'YYYY-MM-DD HH24:MI:SS')) 
+                   VALUES (:operationssaal_id, :bezeichnung, :info, TO_DATE(:endzeitpunkt, 'YYYY-MM-DD"T"HH24:MI'), :fachrichtung, TO_DATE(:startzeitpunkt, 'YYYY-MM-DD"T"HH24:MI')) 
                    RETURNING behandlungs_id INTO :behandlungsId`;
 
       const bindParams = {
           operationssaal_id: req.body.operationssaal_id,
           bezeichnung: req.body.bezeichnung,
           info: req.body.info,
-          berechtigungsstufe: req.body.berechtigungsstufe,
-          endzeitpunkt: req.body.endzeitpunkt,
+          fachrichtung: req.body.fachrichtung,
+          endzeitpunkt: req.body.endzeit,
+          startzeitpunkt: req.body.startzeit,
           behandlungsId: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
       };
 
