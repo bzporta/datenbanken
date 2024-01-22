@@ -83,6 +83,7 @@
                     <button class="tablink">Patients</button>
                     <button class="tablink">Stations</button>
                     <button class="tablink">Personnel</button>
+                    <button class="tablink">Insurance</button>
                     <button class="sign-out-button">Sign out</button>
                 </div>
                 <div class="line"></div>
@@ -145,17 +146,45 @@
                                 <button type="submit" class="btn">Add Patient</button>
                             </form>   
                             <!-- Deleteform -->
-                            <form action="">
+                            <!-- <form action="">
                                 <label for="patientendelete">Patienten-Id</label>
                                 <input type="text" id="patientendelete" name="patientendelete" placeholder="Patienten-Id" required>
                                 <button type="submit" class="btn">Delete Patient</button>
+                            </form> -->
+                            <form action="" id="changePatientForm">
+                                <div class="form-box">
+                                    <label for="newKrankenhausId">Krankenhaus-Id</label>
+                                    <input type="text" id="newKrankenhausId" name="newKrankenhausId" placeholder="Krankenhaus-Id" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="newRaumId">Raum-Id</label>
+                                    <input type="number" id="newRaumId" name="newRaumId" placeholder="Raum-Id" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="changePatientId">Patienten-Id</label>
+                                    <input type="number" id="changePatientId" name="changePatientId" placeholder="Patienten-Id" required>
+                                </div>
+                                <button type="submit" class="btn">Change Patient</button>
                             </form>
+                            
+                            <form action="" id="changePatientEntlassungForm">
+                                <div class="form-box">    
+                                    <label for="newPatientenentlassungsdatum">Entlassungsdatum</label>
+                                    <input type="date" id="newPatientenentlassungsdatum" name="newPatientenentlassungsdatum" required>
+                                </div>
+                                <div class="form-box">
+                                    <label for="changePatientEntlassungId">Patienten-Id</label>
+                                    <input type="number" id="changePatientEntlassungId" name="changePatientEntlassungId" placeholder="Patienten-Id" required>
+                                </div>
+                                <button type="submit" class="btn">Change Date</button>
+                            </form>
+
                             
                             <form action="" class="createTabForm" id="createPatientTableForm">
                                 <label for="patientOrderBy">Sortiert nach</label>
                                 <select name="patientOrderBy" id="patientOrderBy">
-                                    <option value="KRANKENHAUSNAME">Krankenhaus-Name</option>
-                                    <option value="PATIENTENRAUM">Patientenraum</option>
+                                    <option value="KRANKENHAUS_ID">Krankenhaus-Name</option>
+                                    <option value="PATIENTEN_ID">Patienten-Id</option>
                                     <option value="PATIENTENRAUM_ID">Raum-Id</option>
                                     <option value="NAME">Name</option>
                                     <option value="AUFNAHME_DATUM">Aufnahmedatum</option>
@@ -168,7 +197,7 @@
                             </form>
                         </div>
                     
-                        <div class="patienten-tableside">
+                        <div class="personnel-tableside">
                             <div class="wrapper patientenauswahl">
                                 <form action="" id="patientenauswahlform">
                                     <div class="form-box2">
@@ -353,6 +382,14 @@
                                                 <label for="operationInfo">Beschreibung</label>
                                                 <textarea class="input-textarea" id="operationInfo" name="operationInfo" rows="5" required></textarea>
                                             </div>
+
+                                            <div class="form-box">
+                                                <label for="operationKrankenhaus">Erweiterte Krankenhaussuche</label>
+                                                <select name="operationKrankenhaus" id="operationKrankenhaus" required>
+                                                    <option value="0">Nein</option>
+                                                    <option value="1">Ja</option>
+                                                </select>
+                                            </div>
                                             <div class="form-box">
                                                 <label for="operationFachrichtung">Fachrichtung</label>
                                                 <select name="operationFachrichtung" id="operationFachrichtung" required>
@@ -376,11 +413,11 @@
                                             </div>
                                             <div class="form-box">
                                                 <label for="operationStartzeit">Startzeit</label>
-                                                <input type="datetime-local" id="operationStartzeit" name="operationStartzeit" value="2024-02-15T19:30" required></textarea>
+                                                <input type="datetime-local" id="operationStartzeit" name="operationStartzeit" value="2024-02-15T08:00" required></textarea>
                                             </div>
                                             <div class="form-box">
                                                 <label for="operationEndzeit">Endzeit</label>
-                                                <input type="datetime-local" id="operationEndzeit" name="operationEndzeit" value="2024-02-15T20:00" required></textarea>
+                                                <input type="datetime-local" id="operationEndzeit" name="operationEndzeit" value="2024-02-15T10:00" required></textarea>
                                             </div>
                                             <button type="submit" class="btn">Add Treatment</button>
                                         </form>
@@ -560,12 +597,32 @@
                             <button id="createTableButton" class="btn createTableButton">CreateTable</button>
                         </div>
                             
-                        <div class="table-container">
-                            <table id="Personnel-table">
-                                <thead></thead>
-                                <tbody></tbody>
-                            </table>      
+                        <!-- <div class="patienten-tableside"> -->
+                            <div>
+
+                            <!-- <div class="wrapper personalauswahl">
+                                <form action="" id="personalAuswahlform">
+                                    <div class="form-box2">
+                                        <label for="choosePersonnelId">Personnel-Id</label>
+                                        <input type="text" id="choosePersonnelId" name="choosePersonnelId" placeholder="Personnel-Id" required>
+                                    </div>
+                                    <button type="submit" class="btn">Show Details</button>
+                                </form>
+                            </div> -->
+                            
+                            <div class="table-container">
+                                <table id="Personnel-table">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>      
+                            </div>
                         </div>
+
+                        <!-- </div> -->
+                    </div>
+
+                    <div class="content2" id="personnelDetailsTab">
+                        aaaaaaaaaaaaaa
                     </div>
 
                     <!-- Krankenpfleger -->
@@ -630,6 +687,173 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Insurance -->
+                <div class="content">
+                    <div class="wrapper">
+
+                        <form action="" id="versicherung-form-add">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="Versicherungsname" required>
+                            </div>
+                            <button type="submit" class="btn">Add Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-add-patient">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsnummer" name="versicherungsnummer" placeholder="Versicherungsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Add Versicherung to Patient</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-remove">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Remove Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-update">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="neuer Versicherungsname" required>
+                            </div>
+                            <button type="submit" class="btn">Update Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-read">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="versicherungsname" name="versicherungsname" placeholder="Versicherungsname">
+                            </div>
+                            <button type="submit" class="btn">Search Versicherung</button>
+                        </form>
+
+                        <form action="" id="versicherung-form-del">
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <button type="submit" class="btn">Delete Versicherung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-add">
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer" required>
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag" required>
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung" required>
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum" required>
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum" required>
+                            </div>
+                            <button type="submit" class="btn">Add Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-update">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnungs_Nr" required>
+                            </div>
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag">
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung">
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="status" name="status" placeholder="Status">
+                            </div>
+                            <button type="submit" class="btn">Update Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-read">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnung_Nr">
+                            </div>
+                            <div>
+                                <input type="text" id="patientenid" name="patientenid" placeholder="Patienten_ID">
+                            </div>
+                            <div>
+                                <input type="text" id="betriebsnummer" name="betriebsnummer" placeholder="Betriebsnummer">
+                            </div>
+                            <div>
+                                <input type="text" id="betrag" name="betrag" placeholder="Betrag">
+                            </div>
+                            <div>
+                                <input type="text" id="zuzahlung" name="zuzahlung" placeholder="Zuzahlung">
+                            </div>
+                            <div>
+                                <input type="text" id="ausstellungs_datum" name="ausstellungs_datum" placeholder="Ausstellungsdatum">
+                            </div>
+                            <div>
+                                <input type="text" id="faelligkeits_datum" name="faelligkeits_datum" placeholder="Fälligkeitsdatum">
+                            </div>
+                            <button type="submit" class="btn">Search Rechnung</button>
+                        </form>
+
+                        <form action="" id="rechnung-form-del">
+                            <div>
+                                <input type="text" id="rechnungsnr" name="rechnungsnr" placeholder="Rechnungsnr" required>
+                            </div>
+                            <button type="submit" class="btn">Delete Rechnung</button>
+                        </form>
+                    </div>
+
+                    <table id="Patient-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <table id="Versicherung-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <table id="Rechnung-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
     </div>

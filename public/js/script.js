@@ -12,10 +12,11 @@ const homepageContents = document.querySelectorAll('.home-page .content-box .con
 console.log(homepageContents.length);
 let currentTab = 0;
 var patientId;
+var personnelId;
 
 function init() {
-    // showSinglePage('login-page');
-    showSinglePage('home-page');
+    showSinglePage('login-page');
+    // showSinglePage('home-page');
     setupHomePage();
 }
 
@@ -297,10 +298,10 @@ stationAddForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
-    INSERT INTO "MIPM"."STATION" (KRANKENHAUS_ID, STATIONS_NAME, NOTFALLSTATION) 
+    INSERT INTO "MIPM"."STATION" (STATIONS_NAME, KRANKENHAUS_ID, NOTFALLSTATION) 
     VALUES (
-            '${stationAddForm.stationKrankenhausId.value}',
             '${stationAddForm.stationsName.value}',
+            '${stationAddForm.stationKrankenhausId.value}',
             '${stationAddForm.notfallstation.value}');
             COMMIT;
             END;`;              
@@ -350,12 +351,38 @@ deleteStationForm.addEventListener('submit', async(e) => {
 showStationForm = document.getElementById('stationsauswahlform');
 showStationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    var result = await executeSqlCommand(
-        `SELECT *
-        FROM "MIPM". ${showStationForm.raumartauswahl.value}
-        WHERE STATIONS_ID = ${showStationForm.chooseStationId.value}
-        `
-    )
+    var result;
+
+    if (showStationForm.raumartauswahl.value == "OPERATIONSSAAL") {
+        result = await executeSqlCommand(
+            `SELECT *
+            FROM "MIPM". "OPERATIONSSAAL"
+            WHERE STATIONS_ID = ${showStationForm.chooseStationId.value}
+            `
+        );
+    }
+    else if (showStationForm.raumartauswahl.value == "LAGERRAUM") {
+        result = await executeSqlCommand(
+            `SELECT *
+            FROM "MIPM". "LAGERRAUM"
+            WHERE STATIONS_ID = ${showStationForm.chooseStationId.value}
+            `
+        );
+    }
+    else if (showStationForm.raumartauswahl.value == "PATIENTENRAUM") {
+        result = await executeSqlCommand(
+            `SELECT p.patientenraum_id,
+            p.bettkapazitaet,
+            p.bettkapazitaet - COUNT(pa.patienten_id) AS Freie_Betten
+            FROM PATIENTENRAUM p
+            LEFT JOIN PATIENT pa ON p.patientenraum_id = pa.patientenraum_id
+            WHERE p.stations_id = ${showStationForm.chooseStationId.value}
+            GROUP BY
+            p.patientenraum_id, p.bettkapazitaet
+            `
+        );
+    }
+    
     constructTable(result, 'stationsraeume-table');
 });
 
@@ -462,33 +489,35 @@ patientCreateTableForm.addEventListener('submit', async(e) => {
 });
 
 async function setupPatientsTable() {
-    // var result = await executeSqlCommand(
-        // `
-        // CREATE VIEW meine_view AS
-        // SELECT PATIENT.PATIENTEN_ID, 
-        // K.NAME AS KRANKENHAUSNAME, 
-        // S.STATIONS_NAME || '-' || PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
-        // PATIENT.NAME, 
-        // SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
-        // SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
-        // CASE
-        //     WHEN GESCHLECHT = 1 THEN 'Weiblich'
-        //     WHEN GESCHLECHT = 0 THEN 'Männlich'
-        //     WHEN GESCHLECHT = 2 THEN 'Divers'
-        //     ELSE 'Unbekannt'
-        // END AS GESCHLECHT,
-        // SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
-        // BLUTGRUPPE
-        // FROM "MIPM"."PATIENT"
-        // JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        // JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
-        // JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
-        // `
-    // )
     var result = await executeSqlCommand(
-        `SELECT * 
-        FROM SHOW_PATIENTS_TABLE_VIEW`
-    )
+        `
+        
+        SELECT PATIENT.PATIENTEN_ID, 
+        K.NAME AS KRANKENHAUSNAME, 
+        S.STATIONS_NAME || '-' || PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
+        PATIENT.NAME, 
+        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        CASE
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN GESCHLECHT = 0 THEN 'Männlich'
+            WHEN GESCHLECHT = 2 THEN 'Divers'
+            ELSE 'Unbekannt'
+        END AS GESCHLECHT,
+        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+        BLUTGRUPPE
+        FROM "MIPM"."PATIENT"
+        JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+        `
+    );
+
+    console.log(result);
+    // var result = await executeSqlCommand(
+    //     `SELECT * 
+    //     FROM SHOW_PATIENTS_TABLE_VIEW`
+    // )
     constructTable(result, 'patienten-table');
 }
 
@@ -566,20 +595,21 @@ addpatientForm.addEventListener('submit', (e) => {
 
 // Delete Patient
 
-deletePatientForm = document.querySelector('#patiententab .wrapper form:nth-of-type(2)');
-deletePatientForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+// deletePatientForm = document.querySelector('#patiententab .wrapper form:nth-of-type(2)');
+// deletePatientForm.addEventListener('submit', (e) => {
+//     e.preventDefault();
     
-    const query = `BEGIN
-    DELETE FROM "MIPM"."DIAGNOSE" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
-    DELETE FROM "MIPM"."PATIENT" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
-    COMMIT;
-    END;`;
+//     const query = `BEGIN
+//     DELETE FROM "MIPM"."
+//     DELETE FROM "MIPM"."DIAGNOSE" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
+//     DELETE FROM "MIPM"."PATIENT" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
+//     COMMIT;
+//     END;`;
     
-    executeSqlCommand(query);
-    patientCreateTableButton.click();
-    deletePatientForm.reset();
-});
+//     executeSqlCommand(query);
+//     patientCreateTableButton.click();
+//     deletePatientForm.reset();
+// });
 
 // Patient Details
 // Show Patient Details
@@ -591,6 +621,35 @@ showDetailsForm.addEventListener('submit', (e) => {
     createPatientDiagnosesTable();
     showElementByIdDisplay('patientenDetailsTab', 'flex');
     hideElementById('patiententab');
+
+});
+
+// Change Patient
+changePatientForm = document.getElementById('changePatientForm');
+changePatientForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const result = await executeSqlCommand(`
+    BEGIN
+    UPDATE "MIPM"."PATIENT" SET KRANKENHAUS_ID = ${changePatientForm.newKrankenhausId.value} WHERE PATIENTEN_ID = ${changePatientForm.changePatientId.value};
+    UPDATE "MIPM"."PATIENT" SET PATIENTENRAUM_ID = ${changePatientForm.newRaumId.value} WHERE PATIENTEN_ID = ${changePatientForm.changePatientId.value};
+    COMMIT;
+    END;
+    `);
+
+});
+
+// Change Patient Entlassungsdatum
+changePatientEntlassungsdatumForm = document.getElementById('changePatientEntlassungForm');
+changePatientEntlassungsdatumForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    console.log(changePatientEntlassungsdatumForm.newPatientenentlassungsdatum.value);
+    executeSqlCommand(`
+    BEGIN
+    UPDATE "MIPM"."PATIENT" SET ENTLASSUNGS_DATUM = TO_DATE('${changePatientEntlassungsdatumForm.newPatientenentlassungsdatum.value} 00:00:00', 'YYYY-MM-DD HH24:MI:SS') 
+    WHERE PATIENTEN_ID = ${changePatientEntlassungsdatumForm.changePatientEntlassungId.value};
+    COMMIT;
+    END;
+    `);
 
 });
 
@@ -699,6 +758,7 @@ addTherapieForm.addEventListener('submit', async (e) => {
 addOperationForm = document.getElementById('addOperation-form');
 addOperationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
 
     let startzeit = addOperationForm.operationStartzeit.value;
     startzeit = startzeit.split('T');
@@ -707,23 +767,40 @@ addOperationForm.addEventListener('submit', async (e) => {
     let endzeit = addOperationForm.operationEndzeit.value;
     endzeit = endzeit.split('T');
     endzeit = endzeit[1].replace(':', '.');
-    
 
-    // Ermittelt den Operationssaal, der zu einer bestimmten Zeitspanne frei ist, im richtigen Krankenhaus (des Patienten) liegt und genug Kapazität hat
-    const result = await executeSqlCommand(`
-    SELECT OS.OPERATIONSSAAL_ID
-    FROM OPERATIONSSAAL OS
-    JOIN STATION S ON S.STATIONS_ID = OS.STATIONS_ID
-    JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
-    LEFT JOIN OPERATION OP ON OS.OPERATIONSSAAL_ID = OP.OPERATIONSSAAL_ID
-    WHERE OS.OEFFNUNGSZEIT <= ${startzeit}
-        AND OS.SCHLIESSUNGSZEIT >= ${endzeit}
-        AND P.PATIENTEN_ID = ${patientId}
-        AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD HH24:MI:SS')))
-        AND os.personenkapazitaet >= ${addOperationForm.operationPersonenanzahl.value}
-    `
-    );
-    
+    let result = null;
+    console.log(addOperationForm.operationKrankenhaus.value);
+    if (addOperationForm.operationKrankenhaus.value == "1"){
+        // Ermittelt den Operationssaal, der zu einer bestimmten Zeitspanne frei ist, im richtigen Krankenhaus (des Patienten) liegt und genug Kapazität hat
+        result = await executeSqlCommand(`
+        SELECT OS.OPERATIONSSAAL_ID
+        FROM OPERATIONSSAAL OS
+        JOIN STATION S ON S.STATIONS_ID = OS.STATIONS_ID
+        JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+        LEFT JOIN OPERATION OP ON OS.OPERATIONSSAAL_ID = OP.OPERATIONSSAAL_ID
+        WHERE OS.OEFFNUNGSZEIT <= ${startzeit}
+            AND OS.SCHLIESSUNGSZEIT >= ${endzeit}
+            AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS')))
+            AND os.personenkapazitaet >= ${addOperationForm.operationPersonenanzahl.value}
+        `
+        );
+    }
+    else {
+        result = await executeSqlCommand(`
+        SELECT OS.OPERATIONSSAAL_ID
+        FROM OPERATIONSSAAL OS
+        JOIN STATION S ON S.STATIONS_ID = OS.STATIONS_ID
+        JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+        LEFT JOIN OPERATION OP ON OS.OPERATIONSSAAL_ID = OP.OPERATIONSSAAL_ID
+        WHERE OS.OEFFNUNGSZEIT <= ${startzeit}
+            AND OS.SCHLIESSUNGSZEIT >= ${endzeit}
+            AND P.PATIENTEN_ID = ${patientId}
+            AND (OP.STARTZEIT IS NULL OR (OP.ENDZEIT <= TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') OR OP.STARTZEIT >= TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS')))
+            AND os.personenkapazitaet >= ${addOperationForm.operationPersonenanzahl.value}
+        `
+        );
+    }
+
     const operationssaal_id = result[0].OPERATIONSSAAL_ID;
     console.log(operationssaal_id);
 
@@ -746,7 +823,7 @@ addOperationForm.addEventListener('submit', async (e) => {
     var behandlungs_id = await response.json();
     behandlungs_id = behandlungs_id.behandlungsId;
     
-    await executeSqlCommand(
+    executeSqlCommand(
     `
     BEGIN
     INSERT INTO "MIPM"."OPERATION_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID) VALUES (${behandlungs_id}, ${addOperationForm.operationDiagnoseId.value});
@@ -754,6 +831,62 @@ addOperationForm.addEventListener('submit', async (e) => {
     END;
     ` 
     );
+
+    let passender_Arzt = null;
+    console.log(addOperationForm.operationKrankenhaus.value);
+    if (addOperationForm.operationKrankenhaus.value === "1"){
+        passender_Arzt = await executeSqlCommand(
+            `
+            SELECT DISTINCT A.MITARBEITER_NR
+            FROM ARZT A
+            JOIN STATION S ON A.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+            JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+            LEFT JOIN ARZT_OPERATION AO ON A.MITARBEITER_NR = AO.MITARBEITER_NR
+            LEFT JOIN OPERATION OP ON AO.BEHANDLUNGS_ID = OP.BEHANDLUNGS_ID 
+            AND  (OP.STARTZEIT BETWEEN TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') AND TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') 
+            OR OP.ENDZEIT BETWEEN TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') AND TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS'))
+            WHERE A.ARBEITSBEGINN <= ${startzeit}
+                AND A.FACHRICHTUNG = '${addOperationForm.operationFachrichtung.value}'
+                AND A.ARBEITSENDE >= ${endzeit}
+                AND AO.MITARBEITER_NR IS NULL
+            `
+        );
+    }
+    else {
+        passender_Arzt = await executeSqlCommand(
+            `
+            SELECT DISTINCT A.MITARBEITER_NR
+            FROM ARZT A
+            JOIN STATION S ON A.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+            JOIN PATIENT P ON P.KRANKENHAUS_ID = S.KRANKENHAUS_ID
+            LEFT JOIN ARZT_OPERATION AO ON A.MITARBEITER_NR = AO.MITARBEITER_NR
+            LEFT JOIN OPERATION OP ON AO.BEHANDLUNGS_ID = OP.BEHANDLUNGS_ID 
+            AND  (OP.STARTZEIT BETWEEN TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') AND TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') 
+            OR OP.ENDZEIT BETWEEN TO_DATE('${addOperationForm.operationStartzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS') AND TO_DATE('${addOperationForm.operationEndzeit.value}', 'YYYY-MM-DD"T"HH24:MI:SS'))
+            WHERE A.ARBEITSBEGINN <= ${startzeit}
+                AND A.FACHRICHTUNG = '${addOperationForm.operationFachrichtung.value}'
+                AND A.ARBEITSENDE >= ${endzeit}
+                AND P.PATIENTEN_ID = ${patientId}
+                AND AO.MITARBEITER_NR IS NULL
+            `
+        );
+    }
+
+
+    const mitarbeiter_nr = passender_Arzt[0].MITARBEITER_NR;
+
+    console.log("MitarbeiterNr", mitarbeiter_nr);
+
+    executeSqlCommand(
+        `
+        BEGIN
+        INSERT INTO "MIPM"."ARZT_OPERATION" (BEHANDLUNGS_ID, MITARBEITER_NR) VALUES (${behandlungs_id}, ${mitarbeiter_nr});
+        COMMIT;
+        END;
+        ` 
+        );
+
+        addOperationForm.reset();
 });
 
 
@@ -774,10 +907,9 @@ async function createPatientDiagnosesTable() {
     D.BESCHREIBUNG,
     CASE
         WHEN D.STATUS = 0 THEN 'Treatment Completed'
-        WHEN D.STATUS = 1 THEN 'No Treatment'
-        WHEN D.STATUS = 2 THEN 'Treatment in Progress'
+        WHEN D.STATUS = 1 THEN 'Problem not solved'
     END AS Diagnosestatus,
-    LISTAGG(O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS OPERATIONEN,
+    LISTAGG(DISTINCT O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS OPERATIONEN,
     LISTAGG(DISTINCT T.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY T.BEHANDLUNGS_ID) AS THERAPIEN
 FROM
     DIAGNOSE D
@@ -1039,7 +1171,18 @@ personnelForm.addEventListener('submit', (e) => {
     deleteArztForm.reset();
 });
 
-/*
+// // Switch to personnel Details
+// showDetailsForm = document.getElementById('personalAuswahlform');
+// showDetailsForm.addEventListener('submit', (e) => {
+//     e.preventDefault();
+//     personnelId = showDetailsForm.choosePersonnelId.value;
+
+
+
+//     // createPersonnelDetailsTable();
+// });
+
+
 // Versicherung und Rechnung
 // adds
 versicherungForm = document.getElementById('versicherung-form-add');
@@ -1345,8 +1488,6 @@ rechnungCreateTable.addEventListener('submit', async (e) => {
 
     constructTable(result, 'Rechnung-table');
 });
-
-*/
 
 /* HTML zu Versicherung und Rechnung
 
