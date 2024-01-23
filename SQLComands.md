@@ -1,5 +1,50 @@
 # Die wichtigsten SQL-Befehle - kurz erklärt
 
+### Anzeige der Diagnosen-, sowie Therapien und Operationen eines Patienten
+
+```sql 
+`
+SELECT 
+    D.DIAGNOSE_ID,
+    D.MITARBEITER_NR,
+    A.NAME || ', ' || A.VORNAME AS "DIAGNOSTIZIERENDER ARZT",
+    SUBSTR(D.DIAGNOSE_DATUM ,0,8) AS DIAGNOSEDATUM,
+    D.BESCHREIBUNG,
+    CASE
+        WHEN D.STATUS = 0 THEN 'Treatment Completed'
+        WHEN D.STATUS = 1 THEN 'Problem not solved'
+    END AS Diagnosestatus,
+    LISTAGG(DISTINCT O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS OPERATIONEN,
+    LISTAGG(DISTINCT T.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY T.BEHANDLUNGS_ID) AS THERAPIEN
+FROM
+    DIAGNOSE D
+JOIN
+    ARZT A ON D.MITARBEITER_NR = A.MITARBEITER_NR
+LEFT JOIN
+    OPERATION_DIAGNOSE R ON D.DIAGNOSE_ID = R.DIAGNOSE_ID
+LEFT JOIN
+    OPERATION O ON R.BEHANDLUNGS_ID = O.BEHANDLUNGS_ID
+LEFT JOIN
+    THERAPIE_DIAGNOSE TD ON D.DIAGNOSE_ID = TD.DIAGNOSE_ID
+LEFT JOIN
+    THERAPIE T ON TD.BEHANDLUNGS_ID = T.BEHANDLUNGS_ID
+WHERE 
+    D.PATIENTEN_ID = ${patientId}
+GROUP BY
+    D.DIAGNOSE_ID,
+    D.MITARBEITER_NR,
+    A.NAME,
+    A.VORNAME,
+    D.DIAGNOSE_DATUM,
+    D.BESCHREIBUNG,
+    D.STATUS
+    `
+```
+- Anzeige von Diagnose_Id, Mitarbeiter_Nr (Wer hat die Diagnose gestellt?), Nach- und Vorname des diagnostizierenden Arztes, ein Diagnosedatum, Beschreibung der Diagnosel, ob die Beschwerden gelöst sind oder nicht, sowie Auflistung der zugehörigen Therapien und Behandlungen 
+- JOIN von Arzt anhand der Diganose_Id
+- LEFT JOINS von Operation_Diagnose, Operation, Therapie_Diagnose und Therapie (LEFT JOINS, damit auch Diagnosen angezeigt werden, die noch keine Behandlung oder Diagnose erhalten haben)
+- WHERE-Klausel sorgt dafür, dass nur die Diagnosen des ausgewählten Patienten angezeigt werden 
+
 ### Anzeigen der Stationen
 ```sql
 SELECT 
@@ -214,47 +259,4 @@ app.post('/sql/operation', async (req, res) => {
 
 4. Einfügen der ermittelten Mitarbeiter_Nr und der Behandlungs_Id in die Zwischentabelle ARZT_OPERATION
 
-### Anzeige der Diagnosen-, sowie Therapien und Operationen eines Patienten
 
-```sql 
-`
-SELECT 
-    D.DIAGNOSE_ID,
-    D.MITARBEITER_NR,
-    A.NAME || ', ' || A.VORNAME AS "DIAGNOSTIZIERENDER ARZT",
-    SUBSTR(D.DIAGNOSE_DATUM ,0,8) AS DIAGNOSEDATUM,
-    D.BESCHREIBUNG,
-    CASE
-        WHEN D.STATUS = 0 THEN 'Treatment Completed'
-        WHEN D.STATUS = 1 THEN 'Problem not solved'
-    END AS Diagnosestatus,
-    LISTAGG(DISTINCT O.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY O.BEHANDLUNGS_ID) AS OPERATIONEN,
-    LISTAGG(DISTINCT T.BEHANDLUNGS_ID, ', ') WITHIN GROUP (ORDER BY T.BEHANDLUNGS_ID) AS THERAPIEN
-FROM
-    DIAGNOSE D
-JOIN
-    ARZT A ON D.MITARBEITER_NR = A.MITARBEITER_NR
-LEFT JOIN
-    OPERATION_DIAGNOSE R ON D.DIAGNOSE_ID = R.DIAGNOSE_ID
-LEFT JOIN
-    OPERATION O ON R.BEHANDLUNGS_ID = O.BEHANDLUNGS_ID
-LEFT JOIN
-    THERAPIE_DIAGNOSE TD ON D.DIAGNOSE_ID = TD.DIAGNOSE_ID
-LEFT JOIN
-    THERAPIE T ON TD.BEHANDLUNGS_ID = T.BEHANDLUNGS_ID
-WHERE 
-    D.PATIENTEN_ID = ${patientId}
-GROUP BY
-    D.DIAGNOSE_ID,
-    D.MITARBEITER_NR,
-    A.NAME,
-    A.VORNAME,
-    D.DIAGNOSE_DATUM,
-    D.BESCHREIBUNG,
-    D.STATUS
-    `
-```
-- Anzeige von Diagnose_Id, Mitarbeiter_Nr (Wer hat die Diagnose gestellt?), Nach- und Vorname des diagnostizierenden Arztes, ein Diagnosedatum, Beschreibung der Diagnosel, ob die Beschwerden gelöst sind oder nicht, sowie Auflistung der zugehörigen Therapien und Behandlungen 
-- JOIN von Arzt anhand der Diganose_Id
-- LEFT JOINS von Operation_Diagnose, Operation, Therapie_Diagnose und Therapie (LEFT JOINS, damit auch Diagnosen angezeigt werden, die noch keine Behandlung oder Diagnose erhalten haben)
-- WHERE-Klausel sorgt dafür, dass nur die Diagnosen des ausgewählten Patienten angezeigt werden 
