@@ -332,20 +332,20 @@ stationCreateTableForm.addEventListener('submit', async(e) => {
     constructTable(result, 'stations-table');
 });
 
-// Stations Delete form
-deleteStationForm = document.getElementById('stationsDeleteForm');
-deleteStationForm.addEventListener('submit', async(e) => {
-    e.preventDefault();
+// // Stations Delete form
+// deleteStationForm = document.getElementById('stationsDeleteForm');
+// deleteStationForm.addEventListener('submit', async(e) => {
+//     e.preventDefault();
 
-    var result = await executeSqlCommand(
-        `BEGIN
-        DELETE FROM "MIPM"."STATION" WHERE STATIONS_ID = ${deleteStationForm.stationIdDelete.value};
-        COMMIT;
-        END;`
-    )
-    constructTable(result, 'stations-table');
-    deleteStationForm.reset();
-});
+//     var result = await executeSqlCommand(
+//         `BEGIN
+//         DELETE FROM "MIPM"."STATION" WHERE STATIONS_ID = ${deleteStationForm.stationIdDelete.value};
+//         COMMIT;
+//         END;`
+//     )
+//     constructTable(result, 'stations-table');
+//     deleteStationForm.reset();
+// });
 
 // Show Rooms in a Station
 showStationForm = document.getElementById('stationsauswahlform');
@@ -667,20 +667,20 @@ showTreatmentForm.addEventListener('submit', async (e) => {
     showElementByIdDisplay('patientenBehandlung-table', 'table');
 });
 
-// Delete Patient Treatment
-deleteTreatmentForm = document.getElementById('deleteTreatment-form');
-deleteTreatmentForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+// // Delete Patient Treatment
+// deleteTreatmentForm = document.getElementById('deleteTreatment-form');
+// deleteTreatmentForm.addEventListener('submit', async (e) => {
+//     e.preventDefault();
 
-    const result = await executeSqlCommand(
-        `BEGIN
-        DELETE FROM "MIPM"."${deleteTreatmentForm.behandlungstypauswahldelete.value}" WHERE BEHANDLUNGS_ID = ${deleteTreatmentForm.deleteTreatmentId.value};
-        COMMIT;
-        END;`
-    );
-    constructTable(result, 'patientenBehandlung-table');
-    deleteTreatmentForm.reset();
-});
+//     const result = await executeSqlCommand(
+//         `BEGIN
+//         DELETE FROM "MIPM"."${deleteTreatmentForm.behandlungstypauswahldelete.value}" WHERE BEHANDLUNGS_ID = ${deleteTreatmentForm.deleteTreatmentId.value};
+//         COMMIT;
+//         END;`
+//     );
+//     constructTable(result, 'patientenBehandlung-table');
+//     deleteTreatmentForm.reset();
+// });
 
 
 // Add Patient Treatment
@@ -1008,11 +1008,11 @@ openAddTreatmentButton.addEventListener('click', () => {
     showElementByIdDisplay('addTreatmentPopup', 'flex');
 });
 
-// Delete Treatment
-openDeleteTreatmentButton = document.getElementById('deleteTreatmentButton');
-openDeleteTreatmentButton.addEventListener('click', () => {
-    showElementByIdDisplay('deleteTreatmentPopup', 'flex');
-});
+// // Delete Treatment
+// openDeleteTreatmentButton = document.getElementById('deleteTreatmentButton');
+// openDeleteTreatmentButton.addEventListener('click', () => {
+//     showElementByIdDisplay('deleteTreatmentPopup', 'flex');
+// });
 
 // deleteTreatmentCloseButton = document.querySelector('#deleteTreatmentPopup .closeButton');
 // deleteTreatmentCloseButton.addEventListener('click', () => {
