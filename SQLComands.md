@@ -259,4 +259,236 @@ app.post('/sql/operation', async (req, res) => {
 
 4. Einfügen der ermittelten Mitarbeiter_Nr und der Behandlungs_Id in die Zwischentabelle ARZT_OPERATION
 
+### Hinzufügen einer Versicherung
 
+```sql
+        BEGIN
+        INSERT INTO VERSICHERUNG (BETRIEBSNUMMER, VERSICHERUNGSNAME)
+        VALUES (
+        '${versicherungForm.betriebsnummer.value}',
+        '${versicherungForm.versicherungsname.value}');
+        COMMIT;
+        END;
+```
+
+- Fügt eine Versicherung mit der angegebenen Betriebsnummer und dem angegebenen Versicherungsnamen hinzu.
+
+### Zuodnung eines Patienten zu einer Versicherung
+
+```sql
+        BEGIN
+        INSERT INTO PATIENT_VERSICHERUNG (PATIENTEN_ID, BETRIEBSNUMMER,VERSICHERUNGSNUMMER)
+        VALUES (
+        '${patientversicherungForm.patientenid.value}',
+        '${patientversicherungForm.betriebsnummer.value}',
+        '${patientversicherungForm.versicherungsnummer.value}');
+        COMMIT;
+        END;
+```
+
+- Weist einem Patienten anhand seiner ID eine Versicherung anhand der Betriebsnummer zu, und gibt dabei die Versicherungsnummer an.
+
+### Erstellen einer Rechnung
+
+```sql
+        BEGIN
+        INSERT INTO RECHNUNG (PATIENTEN_ID, BETRIEBSNUMMER, BETRAG, ZUZAHLUNG, AUSSTELLUNGS_DATUM, FAELLIGKEITS_DATUM, STATUS)
+        VALUES (
+        '${rechnungForm.patientenid.value}',
+        '${rechnungForm.betriebsnummer.value}',
+        '${rechnungForm.betrag.value}',
+        '${rechnungForm.zuzahlung.value}',
+        '${rechnungForm.ausstellungs_datum.value}',
+        '${rechnungForm.faelligkeits_datum.value}',
+        0);
+        COMMIT;
+        END;
+```
+
+- Erstellt eine Rechnung:
+    - an den Patienten mit der ausgewählten Id
+    - an die Versicherung der angegebenen Betriebsnummer
+    - mit dem angegebenen Betrag
+    - mit der angegebenen Zuzahlung
+    - mit dem angegebenen Ausstellungsdatum
+    - mit dem angegebenen Fälligkeitsdatum
+    - die nicht beglichen ist (0)
+
+### Löschen einer Versicherung von einem Patienten
+
+```sql
+        BEGIN
+        DELETE FROM PATIENT_VERSICHERUNG
+        WHERE PATIENTEN_ID = '${versicherungremove.patientenid.value}'
+        AND BETRIEBSNUMMER = '${versicherungremove.betriebsnummer.value}';
+        COMMIT;
+        END;
+```
+
+- Löscht die Zuordnung eines Patienten zu einer Versicherung, bei der die ID des Patienten und die Betriebsnummer der Versicherung übereinstimmen.
+
+### Löschen einer Versicherung
+
+```sql
+        BEGIN
+        DELETE FROM VERSICHERUNG WHERE BETRIEBSNUMMER = '${versicherungdelete.betriebsnummer.value}';
+        COMMIT;
+        END;
+```
+
+- Löscht die Versicherung mit der angegebenen Betriebsnummer.
+
+### Löschen einer Rechnung
+
+```sql
+        BEGIN
+        DELETE FROM RECHNUNG WHERE RECHNUNGS_NR = '${rechnungdelete.rechnungsnr.value}';
+        COMMIT;
+        END;
+```
+
+- Löscht die Rechnung mit der angegebenen Rechnungsnummer.
+
+### Ändern einer Versicherung
+
+```sql
+        BEGIN
+        UPDATE VERSICHERUNG
+        SET VERSICHERUNGSNAME = '${versicherungupdate.versicherungsname.value}'
+        WHERE BETRIEBSNUMMER = '${versicherungupdate.betriebsnummer.value}';
+        COMMIT;
+        END;
+```
+
+- Ändert den Namen der Versicherung mit der angegebenen Betriebsnummer.
+
+### Ändern einer Rechnung
+
+```sql
+        BEGIN
+        UPDATE RECHNUNG
+        SET PATIENTEN_ID = '${rechnungupdate.patientenid.value}',
+        BETRIEBSNUMMER = '${rechnungupdate.betriebsnummer.value}',
+        BETRAG = '${rechnungupdate.betrag.value}',
+        ZUZAHLUNG = '${rechnungupdate.zuzahlung.value}',
+        AUSSTELLUNGS_DATUM = '${rechnungupdate.ausstellungs_datum.value}',
+        FAELLIGKEITS_DATUM = '${rechnungupdate.faelligkeits_datum.value}',
+        STATUS = '${rechnungupdate.status.value}'
+        WHERE RECHNUNGS_NR = '${rechnungupdate.rechnungsnr.value}';
+        COMMIT;
+        END;
+```
+
+- Ändert die Werte in einer Rechnung, die über die Rechnungsnummer angegeben wurde.
+- Hinweis: in unserer JavaScript-Implementierung wird die Query so angepasst, dass nur die Spalten geändert werden, die auch ausgewählt wurden, indem sie Zeileweise zusammengebaut wird.
+
+### Auswählen der Versicherungen
+
+```sql
+        SELECT * FROM VERSICHERUNG
+        WHERE VERSICHERUNG.BETRIEBSNUMMER = '${versicherungCreateTable.betriebsnummer.value}'
+        AND VERSICHERUNG.VERSICHERUNGSNAME LIKE '${versicherungCreateTable.versicherungsname.value}'
+        ORDER BY VERSICHERUNG.BETRIEBSNUMMER ASC;
+```
+
+- Wählt alle Versicherungen aus:
+    - deren Betreibsnummern der Angabe entsprechen
+    - deren Namen der Auswahl ähneln, mithilfe der 'LIKE' Operation
+    - und ordnet diese aufsteigend nach ihren Betriebsnummern
+- Hinweis: die Query wird wie beim Ändern einer Rechnung erstellt.
+
+### Auswählen aller Versicherungen eines Patenten
+
+```sql
+        SELECT PATIENT_VERSICHERUNG.PATIENTEN_ID, PATIENT_VERSICHERUNG.BETRIEBSNUMMER, PATIENT_VERSICHERUNG.VERSICHERUNGSNUMMER
+        FROM VERSICHERUNG
+        INNER JOIN PATIENT_VERSICHERUNG
+        ON VERSICHERUNG.BETRIEBSNUMMER = PATIENT_VERSICHERUNG.BETRIEBSNUMMER
+        WHERE PATIENT_VERSICHERUNG.PATIENTEN_ID = '${versicherungCreateTable.patientenid.value}'
+        AND VERSICHERUNG.BETRIEBSNUMMER = '${versicherungCreateTable.betriebsnummer.value}'
+        AND VERSICHERUNG.VERSICHERUNGSNAME LIKE '${versicherungCreateTable.versicherungsname.value}'
+        ORDER BY VERSICHERUNG.BETRIEBSNUMMER ASC;
+```
+
+- Wählt alle Versicherungen aus:
+    - denen der Angegebene Patient zugehört
+    - deren Betreibsnummern der Angabe entsprechen
+    - deren Namen der Auswahl ähneln, mithilfe der 'LIKE' Operation
+    - und ordnet diese aufsteigend nach ihren Betriebsnummern
+- Der 'INNER JOIN' wird ausgeführt, um die Patienten mit ihren Versicherungen in Verbindung zu bringen
+- Hinweis: die Query wird wie beim Ändern einer Rechnung erstellt.
+
+### Auswählen von Rechnungen
+
+```sql
+        SELECT
+            RECHNUNGS_NR,
+            PATIENTEN_ID,
+            BETRIEBSNUMMER,
+            BETRAG,
+            ZUZAHLUNG,
+            SUBSTR(AUSSTELLUNGS_DATUM ,0,8) AS AUSSTELLUNGSDATUM,
+            SUBSTR(FAELLIGKEITS_DATUM ,0,8) AS FÄLLIGKEITSDATUM,
+            STATUS
+        FROM
+            RECHNUNG
+        WHERE
+            RECHNUNGS_NR = '${rechnungCreateTable.rechnungsnr.value}'
+        AND
+            PATIENTEN_ID = '${rechnungCreateTable.patientenid.value}'
+        AND
+            BETRIEBSNUMMER = '${rechnungCreateTable.betriebsnummer.value}'
+        AND
+            BETRAG = '${rechnungCreateTable.betrag.value}'
+        AND
+            ZUZAHLUNG = '${rechnungCreateTable.zuzahlung.value}'
+        AND
+            TRUNC(AUSSTELLUNGS_DATUM) = TO_DATE('${rechnungCreateTable.ausstellungs_datum.value}','DD-MM-YYYY')
+        AND
+            TRUNC(FAELLIGKEITS_DATUM) = TO_DATE('${rechnungCreateTable.faelligkeits_datum.value}','DD-MM-YYYY')
+        ORDER BY
+            PATIENTEN_ID ASC
+```
+
+- Wählt alle Rechnungen aus, deren Werte den Angeben entsprechen.
+- Zeigt von den Daten nur Tag, Monat und Jahr an, über die 'SUBSTR()' Funktion
+- Bezieht beim Suchen nur Tag, Monat und Jahr ein, über die 'TRUNC()' Funktion
+- Die letzte Bedingung in der WHERE-Klausel kann durch Eingabe des Wertes 'fällig' durch folgendes ersetzt werden, um alle noch nicht beglichenen Rechnungen zu filtern. Dabei wird das Fälligkeitsdatum (ohne Uhrzeit) mit dem aktuellen Datum (ohne Uhrzeit) verglichen.
+
+```sql
+        TRUNC(FAELLIGKEITS_DATUM) < TRUNC(SYSDATE) AND STATUS = 0
+```
+
+- Bei der Eingabe von zwei Werten pro Spalte wird '=' dur 'BETWEEN' ersetzt, um ganze Bereiche abzusuchen, wie im folgenden SQL-Befehl dargestellt.
+- Sortiert die Ausgabe aufsteigend nach der Patienten-ID.
+- Wird das Schlüsselwort 'sum' als Rechnungsnummer angegeben, wird der Befehl um eine Gruppenfunktion ergänzt, die pro Patient alle seine Rechnungen aufaddiert.
+
+```sql
+        SELECT
+            PATIENTEN_ID,
+            SUM(BETRAG) + SUM(ZUZAHLUNG) AS GESAMTBETRAG
+        FROM
+            RECHNUNG
+        WHERE
+            RECHNUNGS_NR BETWEEN '${[val1]}' AND '${[val2]}'
+        AND
+            PATIENTEN_ID BETWEEN '${[val1]}' AND '${[val2]}'
+        AND
+            BETRIEBSNUMMER = BETWEEN '${[val1]}' AND '${[val2]}'
+        AND
+            BETRAG = BETWEEN '${[val1]}' AND '${[val2]}'
+        AND
+            ZUZAHLUNG = BETWEEN '${[val1]}' AND '${[val2]}'
+        AND
+            TRUNC(AUSSTELLUNGS_DATUM) BETWEEN TO_DATE('${[val1]}','DD-MM-YYYY')
+            AND TO_DATE('${[val2]}','DD-MM-YYYY')
+        AND
+            TRUNC(FAELLIGKEITS_DATUM) BETWEEN TO_DATE('${[val1]}','DD-MM-YYYY')
+            AND TO_DATE('${[val2]}','DD-MM-YYYY')
+        GROUP BY
+            PATIENTEN_ID
+        ORDER BY
+            PATIENTEN_ID ASC;
+```
+
+- Hinweis: die Query wird wie beim Ändern einer Rechnung erstellt.
