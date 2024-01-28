@@ -42,6 +42,7 @@ app.get('/api/test', (req, res) => {
 app.post('/test', (req, res) => {
   console.log(req.body.sql_command);
   try {
+
     const connection =  oracledb.getConnection({
       user: 'DMEIHOEFER',
       password: 'orcPW2023',
@@ -70,7 +71,7 @@ app.post('/api/sql',  async (req, res) => {
   var result;
   try {
     const connection =  await oracledb.getConnection({
-      user: 'mipm',
+      user: 'DMEIHOEFER',
       password: 'orcPW2023',
       connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
     });
@@ -83,8 +84,7 @@ app.post('/api/sql',  async (req, res) => {
 
 
 
-    //console.log(req.body.sql_command);
-    console.log(result.rows);
+
     res.json(result.rows);
   
     await connection.close();
@@ -99,7 +99,7 @@ app.post('/sql/therapie', async (req, res) => {
   try {
 
       const connection =  await oracledb.getConnection({
-        user: 'mipm',
+        user: 'DMEIHOEFER',
         password: 'orcPW2023',
         connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
       });
@@ -134,7 +134,7 @@ app.post('/sql/operation', async (req, res) => {
   try {
 
       const connection =  await oracledb.getConnection({
-        user: 'mipm',
+        user: 'DMEIHOEFER',
         password: 'orcPW2023',
         connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
       });
@@ -170,7 +170,7 @@ app.post('/sql/operation', async (req, res) => {
 app.get('/api/arzt', async (req, res) => {
     try {
       const connection = await oracledb.getConnection({
-        user: 'mipm',
+        user: 'DMEIHOEFER',
         password: 'orcPW2023',
         connectString: 'rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de'
       });

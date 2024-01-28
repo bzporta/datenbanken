@@ -298,7 +298,7 @@ stationAddForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
-    INSERT INTO "MIPM"."STATION" (STATIONS_NAME, KRANKENHAUS_ID, NOTFALLSTATION) 
+    INSERT INTO "DMEIHOEFER"."STATION" (STATIONS_NAME, KRANKENHAUS_ID, NOTFALLSTATION) 
     VALUES (
             '${stationAddForm.stationsName.value}',
             '${stationAddForm.stationKrankenhausId.value}',
@@ -325,9 +325,9 @@ stationCreateTableForm.addEventListener('submit', async(e) => {
             WHEN NOTFALLSTATION = 1 THEN 'Ja'
             WHEN NOTFALLSTATION = 0 THEN 'Nein'
         END AS NOTFALLSTATION
-        FROM "MIPM"."STATION"
-        JOIN "MIPM"."KRANKENHAUS" K ON STATION.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        ORDER BY "MIPM"."STATION".${stationCreateTableForm.stationsOrderBy.value}`
+        FROM "DMEIHOEFER"."STATION"
+        JOIN "DMEIHOEFER"."KRANKENHAUS" K ON STATION.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        ORDER BY "DMEIHOEFER"."STATION".${stationCreateTableForm.stationsOrderBy.value}`
     )
     constructTable(result, 'stations-table');
 });
@@ -339,7 +339,7 @@ stationCreateTableForm.addEventListener('submit', async(e) => {
 
 //     var result = await executeSqlCommand(
 //         `BEGIN
-//         DELETE FROM "MIPM"."STATION" WHERE STATIONS_ID = ${deleteStationForm.stationIdDelete.value};
+//         DELETE FROM "DMEIHOEFER"."STATION" WHERE STATIONS_ID = ${deleteStationForm.stationIdDelete.value};
 //         COMMIT;
 //         END;`
 //     )
@@ -356,7 +356,7 @@ showStationForm.addEventListener('submit', async (e) => {
     if (showStationForm.raumartauswahl.value == "OPERATIONSSAAL") {
         result = await executeSqlCommand(
             `SELECT *
-            FROM "MIPM". "OPERATIONSSAAL"
+            FROM "DMEIHOEFER". "OPERATIONSSAAL"
             WHERE STATIONS_ID = ${showStationForm.chooseStationId.value}
             `
         );
@@ -364,7 +364,7 @@ showStationForm.addEventListener('submit', async (e) => {
     else if (showStationForm.raumartauswahl.value == "LAGERRAUM") {
         result = await executeSqlCommand(
             `SELECT *
-            FROM "MIPM". "LAGERRAUM"
+            FROM "DMEIHOEFER". "LAGERRAUM"
             WHERE STATIONS_ID = ${showStationForm.chooseStationId.value}
             `
         );
@@ -398,7 +398,7 @@ showRoomDetailsForm.addEventListener('submit', async (e) => {
         result = await executeSqlCommand(
             `
             SELECT * 
-            FROM "MIPM"."OPERATION"
+            FROM "DMEIHOEFER"."OPERATION"
             WHERE OPERATIONSSAAL_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
             `
         );
@@ -407,7 +407,7 @@ showRoomDetailsForm.addEventListener('submit', async (e) => {
         var result = await executeSqlCommand(
             `
             SELECT *
-            FROM "MIPM"."MEDIKAMENT"
+            FROM "DMEIHOEFER"."MEDIKAMENT"
             WHERE LAGERRAUM_ID = ${showRoomDetailsForm.kalenderchooseRaumId.value}
             `
         );
@@ -446,7 +446,7 @@ showRoomDetailsForm.addEventListener('submit', async (e) => {
     // var result = await executeSqlCommand(
     //     `
     //     SELECT *
-    //     FROM "MIPM".${showRoomDetailsForm.kalenderraumartauswahl.value}
+    //     FROM "DMEIHOEFER".${showRoomDetailsForm.kalenderraumartauswahl.value}
     //     WHERE ${showRoomDetailsForm.kalenderauswahl.value} = ${showRoomDetailsForm.chooseRoomId.value}
     //     `
     // )
@@ -471,19 +471,14 @@ patientCreateTableForm.addEventListener('submit', async(e) => {
         PATIENT.NAME, 
         SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
         SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
-        CASE
-            WHEN GESCHLECHT = 0 THEN 'Männlich'
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN GESCHLECHT = 2 THEN 'Divers'
-            ELSE 'Unbekannt'
-        END AS GESCHLECHT,
+        GESCHLECHT,
         SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
         BLUTGRUPPE
-        FROM "MIPM"."PATIENT"
-        JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
-        JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
-        ORDER BY "MIPM"."PATIENT".${patientCreateTableForm.patientOrderBy.value}`
+        FROM "DMEIHOEFER"."PATIENT"
+        JOIN "DMEIHOEFER"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN "DMEIHOEFER"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        JOIN "DMEIHOEFER"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+        ORDER BY "DMEIHOEFER"."PATIENT".${patientCreateTableForm.patientOrderBy.value}`
     )
     constructTable(result, 'patienten-table');
 });
@@ -498,18 +493,13 @@ async function setupPatientsTable() {
         PATIENT.NAME, 
         SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
         SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
-        CASE
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN GESCHLECHT = 0 THEN 'Männlich'
-            WHEN GESCHLECHT = 2 THEN 'Divers'
-            ELSE 'Unbekannt'
-        END AS GESCHLECHT,
+        GESCHLECHT,
         SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
         BLUTGRUPPE
-        FROM "MIPM"."PATIENT"
-        JOIN "MIPM"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        JOIN "MIPM"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
-        JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+        FROM "DMEIHOEFER"."PATIENT"
+        JOIN "DMEIHOEFER"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN "DMEIHOEFER"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        JOIN "DMEIHOEFER"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
         `
     );
 
@@ -531,9 +521,9 @@ async function setupStationsTable() {
             WHEN NOTFALLSTATION = 1 THEN 'Ja'
             WHEN NOTFALLSTATION = 0 THEN 'Nein'
         END AS NOTFALLSTATION
-        FROM "MIPM"."STATION"
-        JOIN "MIPM"."KRANKENHAUS" K ON STATION.KRANKENHAUS_ID = K.KRANKENHAUS_ID
-        ORDER BY "MIPM"."STATION".${stationCreateTableForm.stationsOrderBy.value}`
+        FROM "DMEIHOEFER"."STATION"
+        JOIN "DMEIHOEFER"."KRANKENHAUS" K ON STATION.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        ORDER BY "DMEIHOEFER"."STATION".${stationCreateTableForm.stationsOrderBy.value}`
     )
 
     constructTable(result, 'stations-table');
@@ -556,7 +546,7 @@ async function setupStationsTable() {
 //         END AS GESCHLECHT,
 //         SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
 //         BLUTGRUPPE
-//         FROM "MIPM"."PATIENT"`
+//         FROM "DMEIHOEFER"."PATIENT"`
 //     )
 //     constructTable(result, 'patienten-table');
 // });
@@ -573,7 +563,7 @@ addpatientForm.addEventListener('submit', (e) => {
         query_entlassungsdatum = "TO_DATE('${addpatientForm.patientenentlassungsdatum.value} 00:00:00', 'YYYY-MM-DD HH24:MI:SS')";
     }
     const query = `BEGIN
-    INSERT INTO "MIPM"."PATIENT" (KRANKENHAUS_ID, PATIENTENRAUM_ID, NAME, AUFNAHME_DATUM, ENTLASSUNGS_DATUM, GESCHLECHT, GEBURTSDATUM, BLUTGRUPPE) 
+    INSERT INTO "DMEIHOEFER"."PATIENT" (KRANKENHAUS_ID, PATIENTENRAUM_ID, NAME, AUFNAHME_DATUM, ENTLASSUNGS_DATUM, GESCHLECHT, GEBURTSDATUM, BLUTGRUPPE) 
     VALUES (
                    '${addpatientForm.patientenKrankenhausId.value}',
                    '${addpatientForm.patientenRaumId.value}',
@@ -600,9 +590,9 @@ addpatientForm.addEventListener('submit', (e) => {
 //     e.preventDefault();
     
 //     const query = `BEGIN
-//     DELETE FROM "MIPM"."
-//     DELETE FROM "MIPM"."DIAGNOSE" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
-//     DELETE FROM "MIPM"."PATIENT" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
+//     DELETE FROM "DMEIHOEFER"."
+//     DELETE FROM "DMEIHOEFER"."DIAGNOSE" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
+//     DELETE FROM "DMEIHOEFER"."PATIENT" WHERE PATIENTEN_ID = ${deletePatientForm.patientendelete.value};
 //     COMMIT;
 //     END;`;
     
@@ -630,8 +620,8 @@ changePatientForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const result = await executeSqlCommand(`
     BEGIN
-    UPDATE "MIPM"."PATIENT" SET KRANKENHAUS_ID = ${changePatientForm.newKrankenhausId.value} WHERE PATIENTEN_ID = ${changePatientForm.changePatientId.value};
-    UPDATE "MIPM"."PATIENT" SET PATIENTENRAUM_ID = ${changePatientForm.newRaumId.value} WHERE PATIENTEN_ID = ${changePatientForm.changePatientId.value};
+    UPDATE "DMEIHOEFER"."PATIENT" SET KRANKENHAUS_ID = ${changePatientForm.newKrankenhausId.value} WHERE PATIENTEN_ID = ${changePatientForm.changePatientId.value};
+    UPDATE "DMEIHOEFER"."PATIENT" SET PATIENTENRAUM_ID = ${changePatientForm.newRaumId.value} WHERE PATIENTEN_ID = ${changePatientForm.changePatientId.value};
     COMMIT;
     END;
     `);
@@ -645,7 +635,7 @@ changePatientEntlassungsdatumForm.addEventListener('submit', (e) => {
     console.log(changePatientEntlassungsdatumForm.newPatientenentlassungsdatum.value);
     executeSqlCommand(`
     BEGIN
-    UPDATE "MIPM"."PATIENT" SET ENTLASSUNGS_DATUM = TO_DATE('${changePatientEntlassungsdatumForm.newPatientenentlassungsdatum.value} 00:00:00', 'YYYY-MM-DD HH24:MI:SS') 
+    UPDATE "DMEIHOEFER"."PATIENT" SET ENTLASSUNGS_DATUM = TO_DATE('${changePatientEntlassungsdatumForm.newPatientenentlassungsdatum.value} 00:00:00', 'YYYY-MM-DD HH24:MI:SS') 
     WHERE PATIENTEN_ID = ${changePatientEntlassungsdatumForm.changePatientEntlassungId.value};
     COMMIT;
     END;
@@ -674,7 +664,7 @@ showTreatmentForm.addEventListener('submit', async (e) => {
 
 //     const result = await executeSqlCommand(
 //         `BEGIN
-//         DELETE FROM "MIPM"."${deleteTreatmentForm.behandlungstypauswahldelete.value}" WHERE BEHANDLUNGS_ID = ${deleteTreatmentForm.deleteTreatmentId.value};
+//         DELETE FROM "DMEIHOEFER"."${deleteTreatmentForm.behandlungstypauswahldelete.value}" WHERE BEHANDLUNGS_ID = ${deleteTreatmentForm.deleteTreatmentId.value};
 //         COMMIT;
 //         END;`
 //     );
@@ -736,7 +726,7 @@ addTherapieForm.addEventListener('submit', async (e) => {
     mitarberbeiternr.forEach(element => {
         executeSqlCommand(`
         BEGIN
-        INSERT INTO "MIPM"."KRANKENPFLEGER_THERAPIE" (BEHANDLUNGS_ID, MITARBEITER_NR) 
+        INSERT INTO "DMEIHOEFER"."KRANKENPFLEGER_THERAPIE" (BEHANDLUNGS_ID, MITARBEITER_NR) 
         VALUES (${behandlungs_id}, ${element.MITARBEITER_NR});
         COMMIT;
         END;
@@ -747,7 +737,7 @@ addTherapieForm.addEventListener('submit', async (e) => {
     // Eintragen der BEHANDLUNGS_ID und der DIAGNOSE_ID in die entsprechende Zwischentabelle
     executeSqlCommand(`
     BEGIN
-    INSERT INTO "MIPM"."THERAPIE_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID)
+    INSERT INTO "DMEIHOEFER"."THERAPIE_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID)
     VALUES (${behandlungs_id}, ${addTherapieForm.therapieDiagnoseId.value});
     COMMIT;
     END;
@@ -826,7 +816,7 @@ addOperationForm.addEventListener('submit', async (e) => {
     executeSqlCommand(
     `
     BEGIN
-    INSERT INTO "MIPM"."OPERATION_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID) VALUES (${behandlungs_id}, ${addOperationForm.operationDiagnoseId.value});
+    INSERT INTO "DMEIHOEFER"."OPERATION_DIAGNOSE" (BEHANDLUNGS_ID, DIAGNOSE_ID) VALUES (${behandlungs_id}, ${addOperationForm.operationDiagnoseId.value});
     COMMIT;
     END;
     ` 
@@ -880,7 +870,7 @@ addOperationForm.addEventListener('submit', async (e) => {
     executeSqlCommand(
         `
         BEGIN
-        INSERT INTO "MIPM"."ARZT_OPERATION" (BEHANDLUNGS_ID, MITARBEITER_NR) VALUES (${behandlungs_id}, ${mitarbeiter_nr});
+        INSERT INTO "DMEIHOEFER"."ARZT_OPERATION" (BEHANDLUNGS_ID, MITARBEITER_NR) VALUES (${behandlungs_id}, ${mitarbeiter_nr});
         COMMIT;
         END;
         ` 
@@ -973,7 +963,7 @@ addDiagnosisForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
-    INSERT INTO "MIPM"."DIAGNOSE" (MITARBEITER_NR, DIAGNOSE_DATUM, BESCHREIBUNG, STATUS, PATIENTEN_ID) 
+    INSERT INTO "DMEIHOEFER"."DIAGNOSE" (MITARBEITER_NR, DIAGNOSE_DATUM, BESCHREIBUNG, STATUS, PATIENTEN_ID) 
     VALUES (
        '${addDiagnosisForm.diagnosisMitarbeiterNr.value}',
        TO_DATE('${addDiagnosisForm.diagnosisdate.value} 00:00:00', 'YYYY-MM-DD HH24:MI:SS'),
@@ -1078,7 +1068,7 @@ personnelTabButtonKrankenpfleger.addEventListener('click', (e) => {
 personnelKrankenpflegerCreateTableButton = document.querySelector('#krankenpflegertab .wrapper .createTableButton');
 personnelKrankenpflegerCreateTableButton.addEventListener('click', async() => {
     var result = await executeSqlCommand(
-        `SELECT * FROM "MIPM"."KRANKENPFLEGER"`
+        `SELECT * FROM "DMEIHOEFER"."KRANKENPFLEGER"`
     )
     constructTable(result, 'krankenpfleger-table');
 });
@@ -1090,7 +1080,7 @@ krankenpflegerForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
-    INSERT INTO "MIPM"."KRANKENPFLEGER" (KRANKENHAUS_ID, NAME, VORNAME, ARBEITSBEGINN, ARBEITSENDE, QUALIFIKATIONEN, BERECHTIGUNGEN) 
+    INSERT INTO "DMEIHOEFER"."KRANKENPFLEGER" (KRANKENHAUS_ID, NAME, VORNAME, ARBEITSBEGINN, ARBEITSENDE, QUALIFIKATIONEN, BERECHTIGUNGEN) 
     VALUES (
                    '${krankenpflegerForm.krankenhausid.value}',
                    '${krankenpflegerForm.name.value}',
@@ -1113,7 +1103,7 @@ deleteKrankenpflegerForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
-    DELETE FROM "MIPM"."KRANKENPFLEGER" WHERE MITARBEITER_NR = ${deleteKrankenpflegerForm.mitarbeiteridDelete.value};
+    DELETE FROM "DMEIHOEFER"."KRANKENPFLEGER" WHERE MITARBEITER_NR = ${deleteKrankenpflegerForm.mitarbeiteridDelete.value};
     COMMIT;
     END;`;
     
@@ -1128,7 +1118,7 @@ personnelForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const query = `BEGIN
-    INSERT INTO "MIPM"."ARZT" (KRANKENHAUS_ID, NAME, VORNAME, ARBEITSBEGINN, ARBEITSENDE, FACHRICHTUNG, POSITION) 
+    INSERT INTO "DMEIHOEFER"."ARZT" (KRANKENHAUS_ID, NAME, VORNAME, ARBEITSBEGINN, ARBEITSENDE, FACHRICHTUNG, POSITION) 
     VALUES (
         '${personnelForm.krankenhausid.value}',
         '${personnelForm.name.value}',
@@ -1149,7 +1139,7 @@ personnelForm.addEventListener('submit', (e) => {
     personnelCreateTableButton = document.getElementById('createTableButton');
     personnelCreateTableButton.addEventListener('click', async () => {
         var result = await executeSqlCommand(
-            `SELECT * FROM "MIPM"."ARZT"
+            `SELECT * FROM "DMEIHOEFER"."ARZT"
              `
         )
         constructTable(result, 'Personnel-table');
@@ -1162,7 +1152,7 @@ personnelForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
         const query = `BEGIN
-        DELETE FROM "MIPM"."ARZT" WHERE MITARBEITER_NR = ${deleteArztForm.mitarbeiteridDelete.value};
+        DELETE FROM "DMEIHOEFER"."ARZT" WHERE MITARBEITER_NR = ${deleteArztForm.mitarbeiteridDelete.value};
         COMMIT;
                    END;`;
 
@@ -1190,7 +1180,7 @@ versicherungForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const query = `BEGIN
-                   INSERT INTO "MIPM"."VERSICHERUNG" (BETRIEBSNUMMER, VERSICHERUNGSNAME)
+                   INSERT INTO "DMEIHOEFER"."VERSICHERUNG" (BETRIEBSNUMMER, VERSICHERUNGSNAME)
                    VALUES (
                    '${versicherungForm.betriebsnummer.value}',
                    '${versicherungForm.versicherungsname.value}');
@@ -1207,7 +1197,7 @@ patientversicherungForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const query = `BEGIN
-                   INSERT INTO "MIPM"."PATIENT_VERSICHERUNG" (PATIENTEN_ID, BETRIEBSNUMMER, VERSICHERUNGSNUMMER)
+                   INSERT INTO "DMEIHOEFER"."PATIENT_VERSICHERUNG" (PATIENTEN_ID, BETRIEBSNUMMER, VERSICHERUNGSNUMMER)
                    VALUES (
                    '${patientversicherungForm.patientenid.value}',
                    '${patientversicherungForm.betriebsnummer.value}',
@@ -1225,7 +1215,7 @@ rechnungForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const query = `BEGIN
-                   INSERT INTO "MIPM"."RECHNUNG" (PATIENTEN_ID, BETRIEBSNUMMER, BETRAG, ZUZAHLUNG, AUSSTELLUNGS_DATUM, FAELLIGKEITS_DATUM, STATUS)
+                   INSERT INTO "DMEIHOEFER"."RECHNUNG" (PATIENTEN_ID, BETRIEBSNUMMER, BETRAG, ZUZAHLUNG, AUSSTELLUNGS_DATUM, FAELLIGKEITS_DATUM, STATUS)
                    VALUES (
                    '${rechnungForm.patientenid.value}',
                    '${rechnungForm.betriebsnummer.value}',

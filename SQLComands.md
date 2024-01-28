@@ -113,12 +113,7 @@ SELECT
         PATIENT.NAME, 
         SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
         SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
-        CASE
-            WHEN GESCHLECHT = 1 THEN 'Weiblich'
-            WHEN GESCHLECHT = 0 THEN 'Männlich'
-            WHEN GESCHLECHT = 2 THEN 'Divers'
-            ELSE 'Unbekannt'
-        END AS GESCHLECHT,
+        GESCHLECHT,
         SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
         BLUTGRUPPE
         FROM "MIPM"."PATIENT"
@@ -127,7 +122,7 @@ SELECT
         JOIN "MIPM"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
         `
 ```
-- Anzeige von Patienten_Id, Krankenhausname, Konkatenation aus Stationsname und Raumnummer, dem Namen des Patienten, dem angepassten Aufnahme- und Entlassungsdatum, seinem Geschlecht (Angepasst an den Wert in der Datenbank), dem Geburtsdatum und der Blutgruppe
+- Anzeige von Patienten_Id, Krankenhausname, Konkatenation aus Stationsname und Raumnummer, dem Namen des Patienten, dem angepassten Aufnahme- und Entlassungsdatum, seinem Geschlecht, dem Geburtsdatum und der Blutgruppe
 - JOINS von Krankenhaus, Patientenraum und Station anhand der jeweiligen Foreign-Keys
 
 ### Hinzufügen von Therapien zu einem Patienten (mehrere SQL-Statements)
