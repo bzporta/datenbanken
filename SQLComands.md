@@ -1,4 +1,77 @@
-# Die wichtigsten SQL-Befehle - kurz erklärt
+# Medical Institution Patient Management (MIPM) - Erläuterungen zu den Modellen und SQL-Befehlen
+
+## Erläuterungen zu den Modellen
+
+### Gechlechter
+
+Wir speichern unsere Geschlechter als VARCHAR ab. Über Constraints wird sichergestellt, dass nur diese gültigen Werte in der Datenbank gespeichert werden können.
+
+### Entlassungsdatum der Patienten
+
+Das Entlassungsdatum wird als Date gespeichert. Es ist das Datum für die aktuellste Entlassung des Patienten. Der Zeitpunkt der Entlassung muss nicht bei der Erstellung des Patienten angegeben werden. Es kann auch erst später, zum Beispiel wenn der Patient entlassen wird, angegeben werden. Wenn der Patient noch nicht entlassen wurde, wird das Feld mit NULL befüllt.
+
+### Blutgruppe
+
+Die Blutgruppe wird als VARCHAR gespeichert. Wir unterscheiden lediglich zwischen den Blutgruppen A, B, AB und 0. Dies wird über Constraints sichergestellt.
+
+### Notfallstation
+
+Ob eine Station eine Notfallstation ist, oder nicht, wird als Number gespeichert. 0 bedeutet, dass es sich nicht um eine Notfallstation handelt, 1 bedeutet, dass es sich um eine Notfallstation handelt. Auch hier wird über Constraints sichergestellt, dass nur diese Werte in der Datenbank gespeichert werden können.
+
+### Arzt Fachrichtung, Krankenpfleger Qualifikation und Berechtigung
+
+Die Fachrichtung des Arztes und die Qualifikation des Krankenpflegers werden als VARCHAR gespeichert. Die Berechtigungsstufe des Krankenpflegers ist eine Number. Anhand der Fachrichtung des Arztes kann man ihm bestimmte Operationen zuordnen. Die Berechtigung des Krankenpflegers bestimmt, was für Therapien er durchführen darf. Jeder Therapie und jeder Operation ist eine bestimmte Fachrichtung, oder eine bestimmte Berechtigungsstufe zugeordnet.
+### Arbeitsbegin und Arbeitsende
+
+Für das Personal wird der Arbeitsbegin und das Arbeitsende als Number gespeichert. Die Zahlen vor dem Komma entspricht der Stunde und die Zahlen nach dem Komma entsprechen den Minuten. Hier wird davon ausgegangen, dass das Personal immer zur gleichen Zeit anfängt und aufhört zu arbeiten.
+
+### Medikament Bestellstatus
+
+Der Bestellstatus eines Medikaments wird als Number gespeichert. 0 bedeutet, dass das Medikament bestellt wurde, 1 bedeutet, dass das Medikament bereits im Lager ist.
+
+### Diagnosestatus
+
+Auch der Diagnosestatus wird als Number gespeichert. 0 steht hier dafür, dass das Problem in der Diagnose gelöst wurde. Die Behandlung ist also abgeschlossen. 1 bedeutet, dass das Problem noch nicht gelöst wurde. Die Behandlung ist nocht nicht abgeschlossen und das Problem besteht weiterhin. Der default Wert ist 1, also noch nicht gelöst.
+
+### Diagnose und Behandlungsrelation
+
+Über eine Beziehungstabelle wird die Beziehung zwischen Diagnose und Behandlung gespeichert. Eine Diagnose kann zu mehrere Behandlungen führen und eine Behandlung kann auf Grund von mehreren Diagnosen erstellt werden. Die Beziehungstabelle enthält die ID der Diagnose und die ID der Behandlung.
+
+### Rechnunsstatus
+
+Der Rechnungsstatus wird als Number gespeichert. 0 bedeutet, dass die Rechnung noch nicht bezahlt wurde. 1 bedeutet, dass die Rechnung bereits bezahlt wurde.
+
+
+
+## Die wichtigsten SQL-Befehle - kurz erklärt
+
+### Erstellung des Views "SHOW_PATIENTS_TABLE"
+    
+    `
+    CREATE OR REPLACE FORCE EDITIONABLE VIEW "DMEIHOEFER"."SHOW_PATIENTS_TABLE_VIEW" ("PATIENTEN_ID", "KRANKENHAUSNAME", "PATIENTENRAUM", "NAME", "AUFNAHMEDATUM", "ENTLASSUNGSDATUM", "GESCHLECHT", "GEBURTSDATUM", "BLUTGRUPPE") AS 
+    SELECT PATIENT.PATIENTEN_ID, 
+        K.NAME AS KRANKENHAUSNAME, 
+        S.STATIONS_NAME  '-'  PATIENT.PATIENTENRAUM_ID AS PATIENTENRAUM, 
+        PATIENT.NAME, 
+        SUBSTR(AUFNAHME_DATUM ,0,8) AS AUFNAHMEDATUM, 
+        SUBSTR(ENTLASSUNGS_DATUM ,0,8) AS ENTLASSUNGSDATUM, 
+        CASE
+            WHEN GESCHLECHT = 1 THEN 'Weiblich'
+            WHEN GESCHLECHT = 0 THEN 'M nnlich'
+            WHEN GESCHLECHT = 2 THEN 'Divers'
+            ELSE 'Unbekannt'
+        END AS GESCHLECHT,
+        SUBSTR(GEBURTSDATUM ,0,8) AS GEBURTSDATUM, 
+        BLUTGRUPPE
+        FROM "DMEIHOEFER"."PATIENT"
+        JOIN "DMEIHOEFER"."KRANKENHAUS" K ON PATIENT.KRANKENHAUS_ID = K.KRANKENHAUS_ID
+        JOIN "DMEIHOEFER"."PATIENTENRAUM" PR ON PATIENT.PATIENTENRAUM_ID = PR.PATIENTENRAUM_ID
+        JOIN "DMEIHOEFER"."STATION" S ON PR.STATIONS_ID = S.STATIONS_ID
+    `
+
+- Erstellung eines Views, der die wichtigsten Informationen der Patienten enthält
+- Wir erstellen den View, da die Patientenübersicht an mehreren Stellen im Programm benötigt wird und wir so die Query nur einmal schreiben müssen
+
 
 ### Anzeige der Diagnosen-, sowie Therapien und Operationen eines Patienten
 
